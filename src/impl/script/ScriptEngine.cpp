@@ -1682,10 +1682,20 @@ void ScriptEngine::s_InitRequireConfig(luarequire_Configuration* config)
                 }
             }
 
+            if (size_t bi = curpath->string().find("/phoenix/"); bi != std::string::npos)
+            {
+                std::string path = curpath->string();
+                std::string_view builtin = std::string_view(path.begin() + bi, path.end());
+
+                if (BuiltinLibraries.find(builtin) != BuiltinLibraries.end())
+                    return true;
+            }
+
             return std::filesystem::is_regular_file(*curpath)
                     || std::filesystem::is_regular_file(curpath->string() + "c") // `.luauc`
                     || std::filesystem::is_regular_file(*curpath / "init.luau")
-                    || std::filesystem::is_regular_file(*curpath / "init.luauc");
+                    || std::filesystem::is_regular_file(*curpath / "init.luauc")
+                    || BuiltinLibraries.find(curpath->string()) != BuiltinLibraries.end();
         };
     config->get_chunkname = [](lua_State*, void* ctx, char* buffer, size_t bufferSize, size_t* outSize)
         {
@@ -1738,6 +1748,18 @@ void ScriptEngine::s_InitRequireConfig(luarequire_Configuration* config)
     config->load = [](lua_State* L, void* ctx, const char* /* path */, const char* chname, const char* ldname)
         {
             std::filesystem::path* curpath = (std::filesystem::path*)ctx;
+            const std::string path = pathCStr;
+
+            if (path.starts_with("@phoenix/"))
+            {
+                std::string_view name = std::string_view(path.begin() + strlen("@phoenix/"), path.end());
+
+                if (const auto& it = BuiltinLibraries.find(name); it != BuiltinLibraries.end())
+                    return it->second(L);
+                else
+                    luaL_error(L, "Invalid built-in module '%s'", name.data());
+            }
+
             std::string modulePath;
 
             if (std::filesystem::is_regular_file(*curpath))
@@ -2097,6 +2119,14 @@ nlohmann::json ScriptEngine::DumpApiToJson()
     luaL_openlibs(base);
     lua_pushinteger(base, 0);
     lua_setglobal(base, "require");
+
+    lua_setreadonly(luhx, LUA_GLOBALSINDEX, 0);
+
+    for (const auto& [ name, open ] : BuiltinLibraries)
+    {
+        open(luhx);
+        lua_setglobal(luhx, std::format("@phoenix/{}", name).c_str());
+    }
 
     // Compare the environment of our extended environment ("Luhx")
     // with the standard Luau environment to figure out what got added
