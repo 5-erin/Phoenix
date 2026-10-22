@@ -618,6 +618,15 @@
         "synchronize": "function",
         "synchronized": "function"
       },
+      "@phoenix/profiler": {
+        "message": "function",
+        "zonebegin": "function",
+        "zoneend": "function",
+        "zonetext": "function"
+      },
+      "@phoenix/schedule": {
+        "frame": "function"
+      },
       "@phoenix/system": {
         "freememory": "function",
         "hostname": "function",
@@ -899,13 +908,6 @@
         "name": "string",
         "url": "string",
         "version": "table"
-      },
-      "debug": {
-        "breakpoint": "function",
-        "profilemessage": "function",
-        "zonebegin": "function",
-        "zoneend": "function",
-        "zonetext": "function"
       }
     }
   }
