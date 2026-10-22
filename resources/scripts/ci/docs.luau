@@ -1006,8 +1006,6 @@ for _, name in orderedDatatypes do
     documentDatatype(name)
 end
 
-definitionsFile ..= "\n\n"
-
 local orderedComponents = keysOf(apiDump.GameObject.Components)
 table.sort(orderedComponents)
 table.insert(orderedComponents, 1, "GameObject")
@@ -1199,20 +1197,9 @@ local function documentLibrary(name, definitionsFile: string, isPhoenix: boolean
     return definitionsFile
 end
 
-local phoenixDefs = "declare phoenix: {\n"
-
 for _, name in orderedLibraries do
-    if name == "phoenix" then
-        for sub, _ in apiDump.ScriptEnv.Libraries.phoenix do
-            phoenixDefs = documentLibrary(sub, phoenixDefs, true)
-        end
-    else
-        definitionsFile = documentLibrary(name, definitionsFile, false)
-    end
+    definitionsFile = documentLibrary(name, definitionsFile, false)
 end
-
-phoenixDefs ..= "}\n"
-definitionsFile ..= phoenixDefs
 
 local scriptenv = datatypesPrologue .. datatypes .. librariesPrologue .. libraries .. globalsPrologue .. globals
 

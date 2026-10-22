@@ -809,8 +809,6 @@ type Creatables = {
 
 
 
-
-
 declare extern type EnumCollisionType extends EnumItem with end
 export type EnumListCollisionType = {
   read Cube: EnumCollisionType,
@@ -1125,5 +1123,3 @@ declare _RUNTIME: {
     --- URL associated with the runtime
     --- Version information
 
-declare phoenix: {
-}
