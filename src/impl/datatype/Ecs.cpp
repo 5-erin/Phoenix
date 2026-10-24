@@ -3,6 +3,7 @@
 
 #include "datatype/Ecs.hpp"
 #include "datatype/BuiltinComponents.hpp"
+#include "componentsV2/Transform.hpp"
 
 Id pair(Id relation, Id target)
 {
@@ -81,77 +82,6 @@ struct NameComponentRecord : public ComponentRecord<std::string>
     {
         data[index] = value.AsString();
     }
-};
-
-struct TransformComponent
-{
-    glm::mat4 Local = { 1.f };
-    glm::mat4 World = { 1.f };
-};
-
-struct TransformComponentRecord : public ComponentRecord<TransformComponent>
-{
-    TransformComponentRecord()
-    {
-        fields = {
-            { "Local", Reflection::FieldDescriptor{
-                .Read = [](ComponentRecordBase* cr, uint64_t index) -> Reflection::GenericValue
-                {
-                    TransformComponentRecord* tcr = (TransformComponentRecord*)cr;
-                    return tcr->data[index].Local;
-                },
-                .Write = [](ComponentRecordBase* cr, uint64_t index, const Reflection::GenericValue& value)
-                {
-                    TransformComponentRecord* tcr = (TransformComponentRecord*)cr;
-                    tcr->data[index].Local = value.AsMatrix();
-                },
-                .Type = Reflection::ValueType::Matrix,
-            } },
-            { "World", Reflection::FieldDescriptor{
-                .Read = [](ComponentRecordBase* cr, uint64_t index) -> Reflection::GenericValue
-                {
-                    TransformComponentRecord* tcr = (TransformComponentRecord*)cr;
-                    return tcr->data[index].World;
-                },
-                .Write = [](ComponentRecordBase* cr, uint64_t index, const Reflection::GenericValue& value)
-                {
-                    TransformComponentRecord* tcr = (TransformComponentRecord*)cr;
-                    tcr->data[index].World = value.AsMatrix();
-                },
-                .Type = Reflection::ValueType::Matrix,
-                .Serializes = false,
-            } },
-        };
-    }
-
-    Reflection::GenericValue getData(uint64_t index) override
-    {
-        Reflection::GenericValue cell;
-        cell.Val.Component = { .cr = this, .index = index };
-        cell.Type = Reflection::ValueType::Component;
-
-        return cell;
-    }
-
-    void setData(uint64_t index, const Reflection::GenericValue& value) override
-    {
-        value.ForEachMapPair([&](const Reflection::GenericValue& k, const Reflection::GenericValue& v)
-        {
-            std::string_view field = k.AsStringView();
-
-            if (field == "Local")
-                data[index].Local = v.AsMatrix();
-            else if (field == "World")
-                data[index].World = v.AsMatrix();
-        });
-    }
-
-    const Reflection::FieldMap& getFields() override
-    {
-        return fields;
-    }
-
-    static inline Reflection::FieldMap fields;
 };
 
 void World::initialize()

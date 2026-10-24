@@ -439,26 +439,30 @@ void ScriptEngine::LuauVM::StepScheduler(double DeltaTime, std::deque<YieldedCor
         }
     }
 
-    for (int ref : PerFrame)
+    // TODO: Engine currently steps once at shutdown. Do NOT call per-frame events here, as they may try to do dear imgui stuff.
+    if (DeltaTime != 0.0)
     {
-        lua_State* L = lua_newthread(MainThread);
-        lua_getref(L, ref);
-        lua_pushnumber(L, DeltaTime);
-
-        lua_Status status = Resume(L, nullptr, 1);
-
-        if (status != LUA_OK && status != LUA_YIELD && status != LUA_BREAK)
+        for (int ref : PerFrame)
         {
-            int top = lua_gettop(L);
-            const char* err = lua_tostring(L, -1); // can't use `luaL_tolstring` because it might do a metatable check and trigger another exception
+            lua_State* L = lua_newthread(MainThread);
+            lua_getref(L, ref);
+            lua_pushnumber(L, DeltaTime);
 
-            Log.ErrorF(
-                "Script resumption: {}",
-                err ? err : "unknown error"
-            );
-            lua_settop(L, top);
+            lua_Status status = Resume(L, nullptr, 1);
 
-            DumpStacktrace(L);
+            if (status != LUA_OK && status != LUA_YIELD && status != LUA_BREAK)
+            {
+                int top = lua_gettop(L);
+                const char* err = lua_tostring(L, -1); // can't use `luaL_tolstring` because it might do a metatable check and trigger another exception
+
+                Log.ErrorF(
+                    "Script resumption: {}",
+                    err ? err : "unknown error"
+                );
+                lua_settop(L, top);
+
+                DumpStacktrace(L);
+            }
         }
     }
 }

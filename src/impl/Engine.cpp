@@ -40,6 +40,9 @@
 #include "Log.hpp"
 #include "Stl.hpp"
 
+#include "componentsV2/Transform.hpp"
+#include "datatype/BuiltinComponents.hpp"
+
 static Engine* EngineInstance = nullptr;
 
 Engine* Engine::Get()
@@ -1591,6 +1594,17 @@ void Engine::Start()
             physWorld.Dynamics.clear();
             physWorld.Statics.clear();
             particleEmittersRenderList.clear();
+
+            const Id TransformsQuery[] = { Ec::Transform };
+            world.query(TransformsQuery, [&](Id e, const std::vector<World::ComponentData>& datas)
+            {
+                CurrentScene.RenderList.push_back(RenderItem{
+                    .RenderMeshId = 1,
+                    .Transform = ((TransformComponentRecord*)datas[0].cr)->data[datas[0].index].World,
+                    .MaterialId = MaterialManagerInstance.LoadFromPath("materials/Smooth.mtl"),
+                });
+                return true;
+            });
 
             // Aggregate mesh and light data into lists
             traverseHierarchy(
