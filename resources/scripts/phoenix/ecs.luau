@@ -68,8 +68,14 @@ export type World = {
     read targetsOf: (self: World, e: ReadId, relation: ReadId) -> { ReadId },
     --- Find the Nth entity (the first by default) targeted by the relationship with this entity.
     read targetOf: (self: World, e: ReadId, relation: ReadId, index: number?) -> ReadId?,
-    --- Find the parent of this entity through the `ChildOf` relationship.
+    --- Find all sources of a relationship (Recall that relationships are [Source] pair([Relation] [Target])).
+    read sourcesOf: (self: World, relationship: ReadId) -> { ReadId },
+    --- Find the Nth source (the first by default) of a relationship.
+    read sourceOf: (self: World, relationship: ReadId, index: number?) -> ReadId?,
+    --- Find the parent of this entity through the `ChildOf` relation. This is an abstraction over `targetOf`.
     read parentOf: (self: World, e: ReadId) -> ReadId,
+    --- Find all children of an entity through the `ChildOf` relation. This is an abstraction over `sourcesOf`.
+    read childrenOf: (self: World, e: ReadId) -> { ReadId },
 
     -- TODO: Replace this with the type function once the bug is fixed.
     --- Queries the world for all entities matching the given predicates.
@@ -106,6 +112,8 @@ type ecs = {
     read ChildOf: Id<Id>,
     --- Built-in Transform component.
     read Transform: Id<{ Local: Matrix, World: Matrix }>,
+    -- Scene root entity.
+    read Root: ReadId,
 }
 
 local function load(): ecs

@@ -96,7 +96,9 @@ struct World
 
     std::optional<ComponentData> find(Id e, Id c);
     std::optional<Id> targetOf(Id e, Id relation, uint64_t index = 0);
+    std::optional<Id> sourceOf(Id relationship, uint64_t index = 0);
     std::optional<Id> parentOf(Id e);
+    std::optional<Id> childOf(Id e, uint64_t index = 0);
     bool query(
         const std::span<const Id>& predicates,
         const std::function<bool(Id, const std::vector<ComponentData>&)>& keepGoing,

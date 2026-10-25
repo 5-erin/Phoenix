@@ -13,23 +13,20 @@ world:set(Likes, ecs.Name, "Likes")
 world:set(Health, ecs.Name, "Health")
 world:set(Strength, ecs.Name, "Strength")
 
-local root = world:entity()
 local childA = world:entity()
 local childB = world:entity()
 local descendant = world:entity()
 
-world:set(root, ecs.Name, "root")
+world:set(ecs.Root, ecs.Name, "root")
 world:set(childA, ecs.Name, "A")
 world:set(childB, ecs.Name, "B")
 world:set(descendant, ecs.Name, "descendant")
 
-local childOfRoot = ecs.pair(ecs.ChildOf, root)
+local childOfRoot = ecs.pair(ecs.ChildOf, ecs.Root)
 local childOfA = ecs.pair(ecs.ChildOf, childA)
 world:add(childA, childOfRoot)
 world:add(childB, childOfRoot)
 world:add(descendant, childOfA)
-
-world:add(childA, childOfA)
 
 world:set(childOfRoot, ecs.Name, "ChildOfRoot")
 
@@ -37,7 +34,7 @@ world:set(childA, ecs.Transform, { World = Matrix.translated(0, 1, 0), Local = M
 world:set(childB, Strength, 50)
 world:set(descendant, Health, { Current = 40, Max = 50 })
 
-world:add(childA, ecs.pair(Likes, root))
+world:add(childA, ecs.pair(Likes, ecs.Root))
 world:add(childA, ecs.pair(Likes, Health))
 world:add(childA, ecs.pair(Likes, Strength))
 
@@ -57,7 +54,7 @@ end
 
 print("Children of root:")
 
-for e, _ in world:query(ecs.pair(ecs.ChildOf, root)) do
+for e, _ in world:query(ecs.pair(ecs.ChildOf, ecs.Root)) do
     print(`* {nameOf(e)}`)
 end
 

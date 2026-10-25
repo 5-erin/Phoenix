@@ -1599,7 +1599,7 @@ void Engine::Start()
             world.query(TransformsQuery, [&](Id e, const std::vector<World::ComponentData>& datas)
             {
                 CurrentScene.RenderList.push_back(RenderItem{
-                    .RenderMeshId = 1,
+                    .RenderMeshId = 0,
                     .Transform = ((TransformComponentRecord*)datas[0].cr)->data[datas[0].index].World,
                     .MaterialId = MaterialManagerInstance.LoadFromPath("materials/Smooth.mtl"),
                 });

@@ -33,6 +33,7 @@
 #include "script/luhx.hpp"
 #include "datatype/Color.hpp"
 #include "datatype/Ecs.hpp"
+#include "datatype/BuiltinComponents.hpp"
 // #include "component/ScriptEngineService.hpp"
 // #include "DeveloperTools.hpp"
 #include "Utilities.hpp"
@@ -1795,6 +1796,21 @@ static int world_set(lua_State* L)
     return 0;
 }
 
+static int world_targetOf(lua_State* L)
+{
+    World* world = luhx_checkworld(L, 1);
+    Id e = luhx_checkid(L, 2);
+    Id relation = luhx_checkid(L, 3);
+    int index = luaL_optinteger(L, 4, 1) - 1; // 1-based
+
+    if (std::optional<Id> target = world->targetOf(e, relation, index))
+        luhx_pushid(L, target.value());
+    else
+        lua_pushnil(L);
+
+    return 1;
+}
+
 static int world_targetsOf(lua_State* L)
 {
     World* world = luhx_checkworld(L, 1);
@@ -1813,17 +1829,33 @@ static int world_targetsOf(lua_State* L)
     return 1;
 }
 
-static int world_targetOf(lua_State* L)
+static int world_sourceOf(lua_State* L)
 {
     World* world = luhx_checkworld(L, 1);
-    Id e = luhx_checkid(L, 2);
-    Id relation = luhx_checkid(L, 3);
-    int index = luaL_optinteger(L, 4, 1) - 1; // 1-based
+    Id relationship = luhx_checkid(L, 2);
+    int index = luaL_optinteger(L, 3, 1) - 1; // 1-based
 
-    if (std::optional<Id> target = world->targetOf(e, relation, index))
-        luhx_pushid(L, target.value());
+    if (std::optional<Id> source = world->sourceOf(relationship, index))
+        luhx_pushid(L, source.value());
     else
         lua_pushnil(L);
+
+    return 1;
+}
+
+static int world_sourcesOf(lua_State* L)
+{
+    World* world = luhx_checkworld(L, 1);
+    Id relationship = luhx_checkid(L, 2);
+
+    lua_newtable(L);
+
+    std::optional<Id> target;
+    for (int index = 0; (target = world->sourceOf(relationship, index)); index++)
+    {
+        luhx_pushid(L, target.value());
+        lua_rawseti(L, -2, index + 1);
+    }
 
     return 1;
 }
@@ -1839,6 +1871,15 @@ static int world_parentOf(lua_State* L)
         lua_pushnil(L);
 
     return 1;
+}
+
+static int world_childrenOf(lua_State* L)
+{
+    Id e = luhx_checkid(L, 2);
+    lua_pop(L, 1);
+    luhx_pushid(L, pair(Ec::ChildOf, e));
+
+    return world_sourcesOf(L);
 }
 
 static int world_query(lua_State* L)
@@ -1870,9 +1911,12 @@ static const luaL_Reg world_funcs[] = {
     { "find", world_find },
     { "get", world_get },
     { "set", world_set },
-    { "targetsOf", world_targetsOf },
     { "targetOf", world_targetOf },
+    { "targetsOf", world_targetsOf },
+    { "sourceOf", world_sourceOf },
+    { "sourcesOf", world_sourcesOf },
     { "parentOf", world_parentOf },
+    { "childrenOf", world_childrenOf },
     { "query", world_query },
     { nullptr, nullptr }
 };

@@ -2082,11 +2082,10 @@ static void recursiveIterateTree(World& world, Id current)
 
     InsertObjectButtonHoveredOver = 0;
 
-    //const Id ChildrenQuery[] = { pair(Ec::ChildOf, current) };
+    const Id ChildrenQuery[] = { pair(Ec::ChildOf, current) };
 
-    //world.query(ChildrenQuery, [&](Id e, const std::vector<World::ComponentData>&)
+    world.query(ChildrenQuery, [&](Id e, const std::vector<World::ComponentData>&)
     {
-        Id e = current;
         ImGui::PushID(e);
 
         ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow
@@ -2112,7 +2111,7 @@ static void recursiveIterateTree(World& world, Id current)
             }
         }
 
-        if (!world.find(Ec::Wildcard, pair(Ec::ChildOf, e)))
+        if (!world.sourceOf(pair(Ec::ChildOf, e)))
             flags |= ImGuiTreeNodeFlags_Leaf;
 
         ImGui::AlignTextToFramePadding();
@@ -2144,7 +2143,7 @@ static void recursiveIterateTree(World& world, Id current)
         bool isHovered = false;
 
         const std::string name = displayedName(world, e);
-        bool open = ImGui::TreeNodeEx(name.c_str(), flags, "%s", "");
+        bool open = ImGui::TreeNodeEx((void*)e, flags, "%s", "");
 
         nodeClicked = (ImGui::IsItemActivated() || ImGui::IsItemClicked(ImGuiMouseButton_Left)) ? e : nodeClicked;
         openInserter = ImGui::IsItemClicked(ImGuiMouseButton_Right) ? true : openInserter;
@@ -2266,13 +2265,13 @@ static void recursiveIterateTree(World& world, Id current)
 
         if (open)
         {
-            //recursiveIterateTree(world, e);
+            recursiveIterateTree(world, e);
             ImGui::TreePop();
         }
 
         ImGui::PopID();
-        //return true;
-    }//);
+        return true;
+    });
 
     if (nodeClicked)
     {
@@ -3094,13 +3093,7 @@ static void renderExplorer()
     }
 
     VisibleTreeWip.clear();
-    // recursiveIterateTree(Engine::Get()->world, ExplorerRoot);
-
-    world.query({}, [&](Id e, const std::vector<World::ComponentData>&)
-    {
-        recursiveIterateTree(world, e);
-        return true;
-    });
+    recursiveIterateTree(Engine::Get()->world, Ec::Root);
 
     ImVec2 rootDropTargetSize = ImGui::GetContentRegionAvail();
     rootDropTargetSize.y = std::max(rootDropTargetSize.y, 16.f);

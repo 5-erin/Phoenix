@@ -95,6 +95,7 @@ void World::initialize()
     Id childOf = component(new LuauComponentRecord);
     Id name = component(ncr);
     Id transform = component(new TransformComponentRecord);
+    Id root = entity();
 
     add(childOf, exclusive);
 
@@ -109,12 +110,14 @@ void World::initialize()
     assert(childOf == Ec::ChildOf);
     assert(name == Ec::Name);
     assert(transform == Ec::Transform);
+    assert(root == Ec::Root);
 
     (void)wildcard;
     (void)exclusive;
     (void)childOf;
     (void)name;
     (void)transform;
+    (void)root;
 }
 
 void World::shutdown()
@@ -256,9 +259,36 @@ std::optional<Id> World::targetOf(Id e, Id relation, uint64_t index)
     return std::nullopt;
 }
 
+std::optional<Id> World::sourceOf(Id relationship, uint64_t index)
+{
+    const auto& it = predicates.find(relationship);
+
+    if (it != predicates.end() && !it->second->sparse.empty())
+    {
+        uint64_t count = 0;
+
+        for (Id source : it->second->dense)
+        {
+            if (it->second->findIndex(source))
+            {
+                if (count == index)
+                    return source;
+                count++;
+            }
+        }
+    }
+
+    return std::nullopt;
+}
+
 std::optional<Id> World::parentOf(Id e)
 {
     return targetOf(e, Ec::ChildOf);
+}
+
+std::optional<Id> World::childOf(Id e, uint64_t index)
+{
+    return sourceOf(pair(Ec::ChildOf, e), index);
 }
 
 bool World::query(const std::span<const Id>& queryPredicates, const std::function<bool(Id, const std::vector<ComponentData>&)>& keepGoing, Id start)
