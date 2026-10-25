@@ -112,8 +112,6 @@ type ecs = {
     read ChildOf: Id<Id>,
     --- Built-in Transform component.
     read Transform: Id<{ Local: Matrix, World: Matrix }>,
-    -- Scene root entity.
-    read Root: ReadId,
 }
 
 local function load(): ecs

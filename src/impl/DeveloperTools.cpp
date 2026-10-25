@@ -2066,7 +2066,7 @@ static std::string displayedName(World& world, Id id)
         return std::format("({:x})", id);
 }
 
-static void recursiveIterateTree(World& world, Id current)
+static void renderExplorerItem(World& world, Id e)
 {
     ZoneScopedC(tracy::Color::DarkSeaGreen);
 
@@ -2074,7 +2074,7 @@ static void recursiveIterateTree(World& world, Id current)
     // 07/10/2024
     Id nodeClicked = 0;
 
-    if (ExplorerShouldSeekToCurrentSelection && isInSelections(current))
+    if (ExplorerShouldSeekToCurrentSelection && isInSelections(e))
     {
         ExplorerShouldSeekToCurrentSelection = false;
         ImGui::SetScrollHereY();
@@ -2082,196 +2082,197 @@ static void recursiveIterateTree(World& world, Id current)
 
     InsertObjectButtonHoveredOver = 0;
 
-    const Id ChildrenQuery[] = { pair(Ec::ChildOf, current) };
+    ImGui::PushID(e);
 
-    world.query(ChildrenQuery, [&](Id e, const std::vector<World::ComponentData>&)
+    ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow
+        | ImGuiTreeNodeFlags_AllowOverlap
+        | ImGuiTreeNodeFlags_SpanAvailWidth
+        | ImGuiTreeNodeFlags_DrawLinesFull;
+
+    if (isInSelections(e))
     {
-        ImGui::PushID(e);
+        // make the insert button have better contrast
+        if (e != InsertObjectButtonHoveredOver)
+            flags |= ImGuiTreeNodeFlags_Selected;
 
-        ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow
-            | ImGuiTreeNodeFlags_AllowOverlap
-            | ImGuiTreeNodeFlags_SpanAvailWidth
-            | ImGuiTreeNodeFlags_DrawLinesFull;
-
-        if (isInSelections(e))
-        {
-            // make the insert button have better contrast
-            if (e != InsertObjectButtonHoveredOver)
-                flags |= ImGuiTreeNodeFlags_Selected;
-
-            if (ExplorerShouldSeekToCurrentSelection)
-            {
-                if (!ExplorerShouldSeekToCurrentSelection_Frame)
-                {
-                    ExplorerShouldSeekToCurrentSelection = false;
-                    ImGui::SetScrollHereY();
-                }
-                else
-                    ExplorerShouldSeekToCurrentSelection_Frame = false;
-            }
-        }
-
-        if (!world.sourceOf(pair(Ec::ChildOf, e)))
-            flags |= ImGuiTreeNodeFlags_Leaf;
-
-        ImGui::AlignTextToFramePadding();
-
-        // ReflectorRef primaryComponent = object->Components.size() > 0 ? object->Components[0] : ReflectorRef();
-        // if (primaryComponent.Type == EntityComponent::Transform && object->Components.size() > 1)
-        //     primaryComponent = object->Components[1];
-
-        /*
         if (ExplorerShouldSeekToCurrentSelection)
         {
-            std::vector<ObjectHandle> descs = object->GetDescendants();
-
-            for (const ObjectHandle& desc : descs)
+            if (!ExplorerShouldSeekToCurrentSelection_Frame)
             {
-                if (isInSelections(desc))
-                {
-                    ImGui::SetNextItemOpen(true);
-                    flags |= ImGuiTreeNodeFlags_DefaultOpen;
-                    break;
-                }
+                ExplorerShouldSeekToCurrentSelection = false;
+                ImGui::SetScrollHereY();
+            }
+            else
+                ExplorerShouldSeekToCurrentSelection_Frame = false;
+        }
+    }
+
+    if (!world.sourceOf(pair(Ec::ChildOf, e)))
+        flags |= ImGuiTreeNodeFlags_Leaf;
+
+    ImGui::AlignTextToFramePadding();
+
+    // ReflectorRef primaryComponent = object->Components.size() > 0 ? object->Components[0] : ReflectorRef();
+    // if (primaryComponent.Type == EntityComponent::Transform && object->Components.size() > 1)
+    //     primaryComponent = object->Components[1];
+
+    /*
+    if (ExplorerShouldSeekToCurrentSelection)
+    {
+        std::vector<ObjectHandle> descs = object->GetDescendants();
+
+        for (const ObjectHandle& desc : descs)
+        {
+            if (isInSelections(desc))
+            {
+                ImGui::SetNextItemOpen(true);
+                flags |= ImGuiTreeNodeFlags_DefaultOpen;
+                break;
             }
         }
-        */
+    }
+    */
 
-        const ImGuiStyle& style = ImGui::GetStyle();
+    const ImGuiStyle& style = ImGui::GetStyle();
 
-        bool openInserter = false;
-        bool isHovered = false;
+    bool openInserter = false;
+    bool isHovered = false;
 
-        const std::string name = displayedName(world, e);
-        bool open = ImGui::TreeNodeEx((void*)e, flags, "%s", "");
+    const std::string name = displayedName(world, e);
+    bool open = ImGui::TreeNodeEx((void*)e, flags, "%s", "");
 
-        nodeClicked = (ImGui::IsItemActivated() || ImGui::IsItemClicked(ImGuiMouseButton_Left)) ? e : nodeClicked;
-        openInserter = ImGui::IsItemClicked(ImGuiMouseButton_Right) ? true : openInserter;
-        isHovered = ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem) ? true : isHovered;
+    nodeClicked = (ImGui::IsItemActivated() || ImGui::IsItemClicked(ImGuiMouseButton_Left)) ? e : nodeClicked;
+    openInserter = ImGui::IsItemClicked(ImGuiMouseButton_Right) ? true : openInserter;
+    isHovered = ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem) ? true : isHovered;
 
-        if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
+    if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
+    {
+        std::vector<Id> draggingVec;
+
+        if (Selections.size() == 1 && std::find(PrevSelections.begin(), PrevSelections.end(), Selections[0]) != PrevSelections.end())
+            Selections = PrevSelections;
+
+        draggingVec.reserve(Selections.size());
+        for (Id selected : Selections)
+            draggingVec.push_back(selected);
+
+        ImGui::SetDragDropPayload("Explorer_DragGameObject", draggingVec.data(), sizeof(Id) * Selections.size());
+        ImGui::Text("Moving %s", name.c_str());
+        ImGui::EndDragDropSource();
+        nodeClicked = e;
+    }
+
+    if (ImGui::BeginDragDropTarget())
+    {
+        if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("Explorer_DragGameObject"))
         {
-            std::vector<Id> draggingVec;
+            History::ScopedAction action = { "DragAndDropObject" };
+            Id* objects = (Id*)payload->Data;
+            int count = payload->DataSize / sizeof(Id);
 
-            if (Selections.size() == 1 && std::find(PrevSelections.begin(), PrevSelections.end(), Selections[0]) != PrevSelections.end())
-                Selections = PrevSelections;
-
-            draggingVec.reserve(Selections.size());
-            for (Id selected : Selections)
-                draggingVec.push_back(selected);
-
-            ImGui::SetDragDropPayload("Explorer_DragGameObject", draggingVec.data(), sizeof(Id) * Selections.size());
-            ImGui::Text("Moving %s", name.c_str());
-            ImGui::EndDragDropSource();
-            nodeClicked = e;
-        }
-
-        if (ImGui::BeginDragDropTarget())
-        {
-            if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("Explorer_DragGameObject"))
+            try
             {
-                History::ScopedAction action = { "DragAndDropObject" };
-                Id* objects = (Id*)payload->Data;
-                int count = payload->DataSize / sizeof(Id);
+                Selections.clear();
 
-                try
+                for (int index = 0; index < count; index++)
                 {
-                    Selections.clear();
+                    Id dragging = objects[index];
 
-                    for (int index = 0; index < count; index++)
+                    world.add(dragging, pair(Ec::ChildOf, e));
+                    if (!ImGui::IsKeyDown(ImGuiKey_LeftShift))
                     {
-                        Id dragging = objects[index];
-
-                        world.add(dragging, pair(Ec::ChildOf, e));
-                        if (!ImGui::IsKeyDown(ImGuiKey_LeftShift))
-                        {
-                            ExplorerShouldSeekToCurrentSelection = true;
-                            ExplorerShouldSeekToCurrentSelection_Frame = true;
-                        }
-
-                        Selections.emplace_back(dragging);
+                        ExplorerShouldSeekToCurrentSelection = true;
+                        ExplorerShouldSeekToCurrentSelection_Frame = true;
                     }
-                }
-                catch (const std::runtime_error& e)
-                {
-                    setErrorMessage(e.what());
+
+                    Selections.emplace_back(dragging);
                 }
             }
-
-            ImGui::EndDragDropTarget();
-        }
-
-        ImGui::SameLine();
-        ImGui::SetCursorPosX(ImGui::GetCursorPosX() - style.IndentSpacing * 0.6f + 1.5f);
-        ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 2.f); // not the faintest idea
-
-        ImGui::ImageWithBg(
-            getIconForComponent(EntityComponent::None).GpuId,
-            ImVec2(16.f, 16.f),
-            ImVec2(0.f, 0.f),
-            ImVec2(1.f, 1.f),
-            ImVec4()//,
-            // object->TreeEnabled ? ImVec4(1.f, 1.f, 1.f, 1.f) : (object->GetEnabled() ? ImVec4(.6f, .6f, .6f, 1.f) : ImVec4(.4f, .4f, .4f, 1.f))
-        );
-        nodeClicked = (ImGui::IsItemActivated() || ImGui::IsItemClicked(ImGuiMouseButton_Left)) ? e : nodeClicked;
-        openInserter = ImGui::IsItemClicked(ImGuiMouseButton_Right) ? true : openInserter;
-        isHovered = ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem) ? true : isHovered;
-
-        ImGui::SameLine();
-        ImGui::TextUnformatted(name.c_str());
-
-        nodeClicked = (ImGui::IsItemActivated() || ImGui::IsItemClicked(ImGuiMouseButton_Left)) ? e : nodeClicked;
-        openInserter = ImGui::IsItemClicked(ImGuiMouseButton_Right) ? true : openInserter;
-        isHovered = ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem) ? true : isHovered;
-
-        VisibleTreeWip.push_back(e);
-
-        if (openInserter || ImGui::IsItemClicked(ImGuiMouseButton_Right))
-        {
-            ImGui::OpenPopup(1979); // the mimic!!
-
-            if (ImGui::GetIO().KeyCtrl || ImGui::GetIO().KeyShift || !isInSelections(e))
-                // select/add to selections
-                onTreeItemClicked(e);
-
-            ContextActionsForSelection = getPossibleActionsForSelections();
-        }
-
-        if (isHovered || ImGui::IsItemHovered())
-        {
-            ImGui::SameLine();
-
-            ImVec2 defLabelSize = ImGui::CalcTextSize("+", NULL, true);
-            ImVec2 defaultSize = { defLabelSize.x + style.FramePadding.x * 2.f, defLabelSize.y + style.FramePadding.y * 2.f };
-
-            // make it the same size on both axes
-            ImGui::Button("+", ImVec2(defaultSize.y, defaultSize.y));
-
-            // the above call to `::Button` will always
-            // return false, ig this does something different
-            // with the ordering 15/12/2024
-            if (ImGui::IsItemActivated())
+            catch (const std::runtime_error& e)
             {
-                ObjectInsertionTarget = e;
-                ImGui::OpenPopup(45);
-            }
-
-            if (ImGui::IsItemHovered())
-            {
-                ImGui::SetItemTooltip("Insert new Entity");
-                InsertObjectButtonHoveredOver = e;
+                setErrorMessage(e.what());
             }
         }
 
-        if (open)
+        ImGui::EndDragDropTarget();
+    }
+
+    ImGui::SameLine();
+    ImGui::SetCursorPosX(ImGui::GetCursorPosX() - style.IndentSpacing * 0.6f + 1.5f);
+    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 2.f); // not the faintest idea
+
+    ImGui::ImageWithBg(
+        getIconForComponent(EntityComponent::None).GpuId,
+        ImVec2(16.f, 16.f),
+        ImVec2(0.f, 0.f),
+        ImVec2(1.f, 1.f),
+        ImVec4()//,
+        // object->TreeEnabled ? ImVec4(1.f, 1.f, 1.f, 1.f) : (object->GetEnabled() ? ImVec4(.6f, .6f, .6f, 1.f) : ImVec4(.4f, .4f, .4f, 1.f))
+    );
+    nodeClicked = (ImGui::IsItemActivated() || ImGui::IsItemClicked(ImGuiMouseButton_Left)) ? e : nodeClicked;
+    openInserter = ImGui::IsItemClicked(ImGuiMouseButton_Right) ? true : openInserter;
+    isHovered = ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem) ? true : isHovered;
+
+    ImGui::SameLine();
+    ImGui::TextUnformatted(name.c_str());
+
+    nodeClicked = (ImGui::IsItemActivated() || ImGui::IsItemClicked(ImGuiMouseButton_Left)) ? e : nodeClicked;
+    openInserter = ImGui::IsItemClicked(ImGuiMouseButton_Right) ? true : openInserter;
+    isHovered = ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem) ? true : isHovered;
+
+    VisibleTreeWip.push_back(e);
+
+    if (openInserter || ImGui::IsItemClicked(ImGuiMouseButton_Right))
+    {
+        ImGui::OpenPopup(1979); // the mimic!!
+
+        if (ImGui::GetIO().KeyCtrl || ImGui::GetIO().KeyShift || !isInSelections(e))
+            // select/add to selections
+            onTreeItemClicked(e);
+
+        ContextActionsForSelection = getPossibleActionsForSelections();
+    }
+
+    if (isHovered || ImGui::IsItemHovered())
+    {
+        ImGui::SameLine();
+
+        ImVec2 defLabelSize = ImGui::CalcTextSize("+", NULL, true);
+        ImVec2 defaultSize = { defLabelSize.x + style.FramePadding.x * 2.f, defLabelSize.y + style.FramePadding.y * 2.f };
+
+        // make it the same size on both axes
+        ImGui::Button("+", ImVec2(defaultSize.y, defaultSize.y));
+
+        // the above call to `::Button` will always
+        // return false, ig this does something different
+        // with the ordering 15/12/2024
+        if (ImGui::IsItemActivated())
         {
-            recursiveIterateTree(world, e);
-            ImGui::TreePop();
+            ObjectInsertionTarget = e;
+            ImGui::OpenPopup(45);
         }
 
-        ImGui::PopID();
-        return true;
-    });
+        if (ImGui::IsItemHovered())
+        {
+            ImGui::SetItemTooltip("Insert new Entity");
+            InsertObjectButtonHoveredOver = e;
+        }
+    }
+
+    if (open)
+    {
+        const Id ChildrenQuery[] = { pair(Ec::ChildOf, e) };
+
+        world.query(ChildrenQuery, [&](Id child, const std::vector<World::ComponentData>&)
+        {
+            renderExplorerItem(world, child);
+            return true;
+        });
+
+        ImGui::TreePop();
+    }
+
+    ImGui::PopID();
 
     if (nodeClicked)
     {
@@ -3093,7 +3094,14 @@ static void renderExplorer()
     }
 
     VisibleTreeWip.clear();
-    recursiveIterateTree(Engine::Get()->world, Ec::Root);
+
+    world.query({}, [&](Id e, const std::vector<World::ComponentData>&)
+    {
+        if (e > Ec::count && world.predicates.find(e) == world.predicates.end() && !world.find(e, pair(Ec::ChildOf, Ec::Wildcard)))
+            renderExplorerItem(world, e);
+
+        return true;
+    });
 
     ImVec2 rootDropTargetSize = ImGui::GetContentRegionAvail();
     rootDropTargetSize.y = std::max(rootDropTargetSize.y, 16.f);

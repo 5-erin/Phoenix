@@ -18,9 +18,6 @@ struct Ec_
         Name,
         Transform,
 
-        // Scene root.
-        Root,
-
         afterEnd,
         count = afterEnd - 1
     };
@@ -34,7 +31,6 @@ constexpr std::string_view EcNames[] = {
     "ChildOf",
     "Name",
     "Transform",
-    "Root",
 };
 
 static_assert(std::size(EcNames) == Ec::count);

@@ -1947,7 +1947,7 @@ static int querymeta_iter(lua_State* L)
 
     lua_pushcfunction(L, queryNext, "QueryNext");
     lua_pushvalue(L, 1); // Iterator data (query object).
-    luhx_pushid(L, 0);     // Iterator state (0 = at the beginning).
+    luhx_pushid(L, 0);   // Iterator state (0 = at the beginning).
     return 3;
 }
 

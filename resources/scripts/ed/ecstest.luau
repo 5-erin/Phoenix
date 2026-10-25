@@ -17,24 +17,17 @@ local childA = world:entity()
 local childB = world:entity()
 local descendant = world:entity()
 
-world:set(ecs.Root, ecs.Name, "root")
 world:set(childA, ecs.Name, "A")
 world:set(childB, ecs.Name, "B")
 world:set(descendant, ecs.Name, "descendant")
 
-local childOfRoot = ecs.pair(ecs.ChildOf, ecs.Root)
 local childOfA = ecs.pair(ecs.ChildOf, childA)
-world:add(childA, childOfRoot)
-world:add(childB, childOfRoot)
 world:add(descendant, childOfA)
-
-world:set(childOfRoot, ecs.Name, "ChildOfRoot")
 
 world:set(childA, ecs.Transform, { World = Matrix.translated(0, 1, 0), Local = Matrix.translated(1, 0, 0) })
 world:set(childB, Strength, 50)
 world:set(descendant, Health, { Current = 40, Max = 50 })
 
-world:add(childA, ecs.pair(Likes, ecs.Root))
 world:add(childA, ecs.pair(Likes, Health))
 world:add(childA, ecs.pair(Likes, Strength))
 
@@ -45,17 +38,9 @@ for e, name in world:query(ecs.Name) do
     print(`* {e}: {name}`)
 end
 
-print("")
-
 local function nameOf(e: ecs.ReadId)
     local name = world:find(e, ecs.Name)
     return name or `({ e })`
-end
-
-print("Children of root:")
-
-for e, _ in world:query(ecs.pair(ecs.ChildOf, ecs.Root)) do
-    print(`* {nameOf(e)}`)
 end
 
 print("")
