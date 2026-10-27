@@ -21,8 +21,7 @@ world:set(childA, ecs.Name, "A")
 world:set(childB, ecs.Name, "B")
 world:set(descendant, ecs.Name, "descendant")
 
-local childOfA = ecs.pair(ecs.ChildOf, childA)
-world:add(descendant, childOfA)
+world:add(descendant, ecs.pair(ecs.ChildOf, childA))
 
 world:set(childA, ecs.Transform, { World = Matrix.translated(0, 1, 0), Local = Matrix.translated(1, 0, 0) })
 world:set(childB, Strength, 50)
