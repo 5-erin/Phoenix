@@ -1655,6 +1655,7 @@ void Engine::Shutdown()
     }
     glfwTerminate();
 
+    /*
     for (const GameObject& obj : ObjectManager.WorldArray)
     {
         if (obj.HardRefCount > 0)
@@ -1662,6 +1663,7 @@ void Engine::Shutdown()
         else if (obj.Valid)
             Log.WarningF("Object {} left dangling!", obj.GetFullName());
     }
+    */
 
     EngineInstance = nullptr;
 }

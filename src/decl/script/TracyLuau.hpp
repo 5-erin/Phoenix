@@ -9,10 +9,7 @@
 
 #ifdef TRACY_ENABLE
 
-#include "tracy/public/common/TracyColor.hpp"
 #include "tracy/public/common/TracyAlign.hpp"
-#include "tracy/public/common/TracyForceInline.hpp"
-#include "tracy/public/common/TracySystem.hpp"
 #include "tracy/public/client/TracyProfiler.hpp"
 
 // 24/06/2026
@@ -25,7 +22,7 @@ namespace tracy
 TRACY_API LuaZoneState& GetLuaZoneState();
 #endif
 
-static inline void LuauShortenSrc( char* dst, const char* src )
+static inline void LuaShortenSrc( char* dst, const char* src )
 {
     size_t l = std::min( (size_t)255, strlen( src ) );
     for( size_t i=0; i<l; i++ )
@@ -153,37 +150,18 @@ static inline int LuauZoneBeginNImpl( lua_State* L, std::string* ZoneName )
     return LuaZoneBeginNS( L );
 #else
 #ifdef TRACY_ON_DEMAND
-    const auto zoneCnt = GetLuaZoneState().counter++;
-    if( zoneCnt != 0 && !GetLuaZoneState().active ) return 0;
-    GetLuaZoneState().active = GetProfiler().IsConnected();
-    if( !GetLuaZoneState().active ) return 0;
+    const auto connectionId = GetProfiler().IsConnected() ? GetProfiler().ConnectionId() : 0;
+    GetLuaZoneState().Push( connectionId );
+    if( !connectionId ) return 0;
 #endif
 
     lua_Debug dbg = {};
     lua_getinfo( L, 1, "snl", &dbg );
+    size_t nsz;
     char src[256];
-    LuauShortenSrc( src, dbg.source );
-
-    uint64_t srcloc = UINT64_MAX;
-
-    if (lua_isnoneornil(L, 1))
-    {
-        const char* name = dbg.name ? dbg.name : dbg.short_src;
-
-        srcloc = Profiler::AllocSourceLocation( dbg.currentline, src, name );
-
-        if (ZoneName)
-            *ZoneName = name;
-    }
-    else
-    {
-        size_t nsz = 0;
-        const auto name = lua_tolstring(L, 1, &nsz);
-        srcloc = Profiler::AllocSourceLocation( dbg.currentline, src, dbg.name ? dbg.name : dbg.short_src, name, nsz );
-
-        if (ZoneName)
-            *ZoneName = name;
-    }
+    LuaShortenSrc( src, dbg.source );
+    const auto name = lua_tolstring( L, 1, &nsz );
+    const auto srcloc = Profiler::AllocSourceLocation( dbg.currentline, src, dbg.name ? dbg.name : dbg.short_src, name, nsz );
 
     TracyQueuePrepare( QueueType::ZoneBeginAllocSrcLoc );
     MemWrite( &item->zoneBegin.time, Profiler::GetTime() );
@@ -193,46 +171,34 @@ static inline int LuauZoneBeginNImpl( lua_State* L, std::string* ZoneName )
 #endif
 }
 
-static inline void LuauZoneEndImpl()
+static inline int LuauZoneEndImpl()
 {
 #ifdef TRACY_ON_DEMAND
-    assert( GetLuaZoneState().counter != 0 );
-    GetLuaZoneState().counter--;
-    if( !GetLuaZoneState().active )
-        return;
-    if( !GetProfiler().IsConnected() )
-    {
-        GetLuaZoneState().active = false;
-        return;
-    }
+    const auto connectionId = GetLuaZoneState().Pop();
+    if( !connectionId || GetProfiler().ConnectionId() != connectionId ) return 0;
 #endif
 
     TracyQueuePrepare( QueueType::ZoneEnd );
     MemWrite( &item->zoneEnd.time, Profiler::GetTime() );
     TracyQueueCommit( zoneEndThread );
+    return 0;
 }
 
 static inline int LuauZoneEnd( lua_State* )
 {
-    LuauZoneEndImpl();
-    return 0;
+    return LuauZoneEndImpl();
 }
 
 static inline int LuauZoneText( lua_State* L )
 {
 #ifdef TRACY_ON_DEMAND
-    if( !GetLuaZoneState().active ) return 0;
-    if( !GetProfiler().IsConnected() )
-    {
-        GetLuaZoneState().active = false;
-        return 0;
-    }
+    const auto connectionId = GetLuaZoneState().Top();
+    if( !connectionId || GetProfiler().ConnectionId() != connectionId ) return 0;
 #endif
-    luaL_checktype(L, 1, LUA_TSTRING);
 
     auto txt = lua_tostring( L, 1 );
     const auto size = strlen( txt );
-    assert( size < (std::numeric_limits<uint16_t>::max)() );
+    TRACY_ASSERT( size < (std::numeric_limits<uint16_t>::max)() );
 
     auto ptr = (char*)tracy_malloc( size );
     memcpy( ptr, txt, size );
@@ -277,11 +243,10 @@ static inline int LuauMessage( lua_State* L )
 #ifdef TRACY_ON_DEMAND
     if( !GetProfiler().IsConnected() ) return 0;
 #endif
-    luaL_checktype(L, 1, LUA_TSTRING);
 
     auto txt = lua_tostring( L, 1 );
     const auto size = strlen( txt );
-    assert( size < (std::numeric_limits<uint16_t>::max)() );
+    TRACY_ASSERT( size < (std::numeric_limits<uint16_t>::max)() );
 
     auto ptr = (char*)tracy_malloc( size );
     memcpy( ptr, txt, size );
