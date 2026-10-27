@@ -791,7 +791,7 @@ std::string ScriptEngine::CompileBytecode(const std::string_view& SourceCode, in
     // once and cache the result
     const char* mutableGlobals[] = {
         "game",
-        NULL
+        nullptr
     };
 
     Luau::CompileOptions compileOptions;
