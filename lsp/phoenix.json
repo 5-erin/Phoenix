@@ -1135,6 +1135,9 @@
   "@phoenix/global/debug.zonetext": {
     "documentation": "* Set additional debug text for the zone"
   },
+  "@phoenix/global/game": {
+    "documentation": "* The GameObject acting as the Data Model of the Engine"
+  },
   "@phoenix/global/warn": {
     "documentation": "* Same as `print`, except generates a Warning message"
   },

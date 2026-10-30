@@ -480,21 +480,16 @@
       },
       "Mutex": {},
       "NumberGradient": {},
-      "Query": {},
       "SharedBuffer": {},
-      "VectorGradient": {},
-      "World": {}
+      "VectorGradient": {}
     },
     "Globals": {
-      "@phoenix/world": "World",
       "_VMNAME": "string",
       "appendlog": "function",
+      "game": "GameObject & EcDataModel",
       "warn": "function"
     },
     "Libraries": {
-      "@phoenix/ecs": {
-        "pair": "function"
-      },
       "@phoenix/fs": {
         "copy": "function",
         "cwd": "function",

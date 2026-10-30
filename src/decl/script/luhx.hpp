@@ -22,9 +22,6 @@ void luhx_openlibs(lua_State*);
 
 int luhxopen_base(lua_State*);
 
-int luhxopen_ecs(lua_State*);
-int luhxopen_world(lua_State*);
-
 int luhxopen_fs(lua_State*);
 int luhxopen_imgui(lua_State*);
 int luhxopen_json(lua_State*);
@@ -44,8 +41,6 @@ int luhxopen_Color(lua_State*);
 int luhxopen_Matrix(lua_State*);
 
 static const inline std::unordered_map<std::string_view, lua_CFunction> BuiltinLibraries = {
-	{ "ecs", luhxopen_ecs },
-	{ "world", luhxopen_world },
 	{ "fs", luhxopen_fs },
 	{ "imgui", luhxopen_imgui },
 	{ "json", luhxopen_json },

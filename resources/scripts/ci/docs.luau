@@ -392,13 +392,12 @@ local function dumpLibMembers(libm: { [string]: any }, t: { [string]: any }, lib
     local hasWholeDefinition = wholeDefinition ~= nil
 
     local isModule = string.find(libname, "@phoenix/") == 1
-    local shortName = if isModule then string.sub(libname, #("@phoenix/") + 1) else libname
 
     if isModule then
         definitionsFile ..= `--- { if typeof(lib.Description) == "table" then table.concat(lib.Description, "\n---\n--- ") else lib.Description }\n`
     end
 
-    definitionsFile ..= if isPhoenix then `{libname}: \{\n  ` else if hasWholeDefinition then `declare { libname }: { wholeDefinition }\n` else `type { shortName } = \{\n,\n`
+    definitionsFile ..= if isPhoenix then `{libname}: \{\n  ` else `declare { libname }: \{\n\n`
 
     local str = ""
     local first = true

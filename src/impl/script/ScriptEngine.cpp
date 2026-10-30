@@ -1745,10 +1745,10 @@ void ScriptEngine::s_InitRequireConfig(luarequire_Configuration* config)
             memcpy(buffer, contents.data(), contents.size());
             return success ? WRITE_SUCCESS : WRITE_FAILURE;
         };
-    config->load = [](lua_State* L, void* ctx, const char* /* path */, const char* chname, const char* ldname)
+    config->load = [](lua_State* L, void* ctx, const char* pathCStr, const char* chname, const char* ldname)
         {
             std::filesystem::path* curpath = (std::filesystem::path*)ctx;
-            const std::string path = pathCStr;
+            const std::string_view path = pathCStr;
 
             if (path.starts_with("@phoenix/"))
             {

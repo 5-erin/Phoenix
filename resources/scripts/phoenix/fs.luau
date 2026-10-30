@@ -23,8 +23,7 @@
 --- Avoid overwriting the `base` alias as this may cause certain default assets to stop loading
 ---
 --- Aliases beginning with `_` may only be defined or remove by the root Luau VM
-type fs = {
-    --- Copies the file/directory at the given path to a new path
+declare @phoenix/fs: {    --- Copies the file/directory at the given path to a new path
     ---
     --- If unsuccessfully, throws an error message
     read copy: (( From: string, To: string ) -> ()),
