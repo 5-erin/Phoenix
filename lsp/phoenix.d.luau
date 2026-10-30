@@ -241,7 +241,8 @@ declare extern type Color with
   R: number
 end
 
-declare Color: {    --- Returns a Color with the provided R, G, and B values
+declare Color: {
+    --- Returns a Color with the provided R, G, and B values
     ---
     --- Values are expected to be in the range 0 to 1
     ---
@@ -259,7 +260,8 @@ end
 
 
 
-declare GameObject: {    --- Clears all previously defined component data
+declare GameObject: {
+    --- Clears all previously defined component data
     read clearAllComponentDefinitions: () -> (),
     --- Defines a custom component
     ---
@@ -308,7 +310,8 @@ declare extern type Matrix with
   Up: vector
 end
 
-declare Matrix: {    --- An identity matrix, the same value as what gets returned with `.new()` with no arguments
+declare Matrix: {
+    --- An identity matrix, the same value as what gets returned with `.new()` with no arguments
     read identity: Matrix,
     --- Creates a Matrix at position `Eye` oriented such that the `.Forward` vector moves toward `Target`
     read lookAt: (( Eye: vector, Target: vector, Up: vector? ) -> (Matrix)),
