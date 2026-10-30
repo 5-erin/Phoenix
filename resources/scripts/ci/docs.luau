@@ -459,7 +459,7 @@ local function dumpLibMembers(libm: { [string]: any }, t: { [string]: any }, lib
                 end
 
                 for _, vIn in ins do
-                    local docsig, defsig = dumpFuncSignature(libname, k, vIn, v.Out or "", v)
+                    local docsig, defsig = dumpFuncSignature(shortName, k, vIn, v.Out or "", v)
                     str ..= `\`\`\`luau\n{ docsig }\n\`\`\`\n`
 
                     if not hasWholeDefinition then
@@ -473,7 +473,7 @@ local function dumpLibMembers(libm: { [string]: any }, t: { [string]: any }, lib
                 end
             else
                 assert(typeof(v.Type) == "string")
-                str ..= `\`\`\`luau\n{libname}.{k}{v.Type}\n\`\`\`\n`
+                str ..= `\`\`\`luau\n{shortName}.{k}{v.Type}\n\`\`\`\n`
 
                 if not hasWholeDefinition then
                     definitionsFile ..= v.Type .. ",\n"
@@ -484,7 +484,7 @@ local function dumpLibMembers(libm: { [string]: any }, t: { [string]: any }, lib
                 docWarn(`Error with member {k}`)
                 return str, definitionsFile
             end
-            str ..= `\`\`\`luau\n{libname}.{ k }: { v.Type }\n\`\`\`\n`
+            str ..= `\`\`\`luau\n{shortName}.{ k }: { v.Type }\n\`\`\`\n`
 
             if not hasWholeDefinition then
                 definitionsFile ..= `    read { k }: { v.Type },\n`

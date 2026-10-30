@@ -6,6 +6,7 @@ local Git = {
 }
 
 local process = require("@std/process")
+local xfs = require("@phoenix/fs")
 
 function Git.Initialize()
     Git.Available = process.system("git --version").stdout:find("git version") ~= nil
@@ -13,7 +14,7 @@ function Git.Initialize()
 end
 
 function Git.Command(Command)
-    return process.system(`git -C "{ phoenix.fs.resolvepathabsolute("@project") }" { Command }`).stdout
+    return process.system(`git -C "{ xfs.resolvepathabsolute("@project") }" { Command }`).stdout
 end
 
 return Git

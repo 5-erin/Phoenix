@@ -2893,7 +2893,7 @@ static void renderDocumentationViewer()
             else
                 renderFunctionSignature(memberIt);
 
-            renderDescription(member["Description"], nCharsPerLine);
+            renderDescription(member, nCharsPerLine);
             ImGui::NewLine();
         }
 
@@ -2935,7 +2935,7 @@ static void renderDocumentationViewer()
                     ImGui::TextUnformatted(addLinebreaks((const std::string&)it.value(), nCharsPerLine / 3 - 4).c_str());
 
                     ImGui::TableSetColumnIndex(2);
-                    ImGui::Text("%d", (int)enuApi[it.key()]);
+                    ImGui::Text("%d", (int)enuApi.value(it.key(), -999));
                 }
 
                 ImGui::EndTable();
@@ -3425,14 +3425,22 @@ static void recursiveRenderFilesystemNode(FilesystemNode& Node)
         if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("FileViewer"))
         {
             std::filesystem::path path = std::filesystem::path(std::string_view((const char*)payload->Data, payload->DataSize));
+            std::filesystem::path target = Node.Path / path.filename();
 
-            std::error_code ec;
-            std::filesystem::rename(path, Node.Path / path.filename(), ec);
+            if (!std::filesystem::exists(target))
+            {
+                std::error_code ec;
+                std::filesystem::rename(path, target, ec);
 
-            if (ec)
-                setErrorMessage(ec.message());
+                if (ec)
+                    setErrorMessage(ec.message());
+                else
+                    FilesViewLastRefreshed = 0.f;
+            }
             else
-                FilesViewLastRefreshed = 0.f;
+            {
+                setErrorMessage("A file already exists in this folder with that name");
+            }
         }
 
         ImGui::EndDragDropTarget();
@@ -3698,14 +3706,22 @@ static void renderFilesViewer()
         if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("FileViewer"))
         {
             std::filesystem::path path = std::filesystem::path(std::string_view((const char*)payload->Data, payload->DataSize));
+            std::filesystem::path target = std::filesystem::path(FileRW::ResolvePathNormalized(FilesViewerRootPath)) / path.filename();
 
-            std::error_code ec;
-            std::filesystem::rename(path, std::filesystem::path(FileRW::ResolvePathNormalized(FilesViewerRootPath)) / path.filename(), ec);
+            if (!std::filesystem::exists(target))
+            {
+                std::error_code ec;
+                std::filesystem::rename(path, target, ec);
 
-            if (ec)
-                setErrorMessage(ec.message());
+                if (ec)
+                    setErrorMessage(ec.message());
+                else
+                    FilesViewLastRefreshed = 0.f;
+            }
             else
-                FilesViewLastRefreshed = 0.f;
+            {
+                setErrorMessage("A file with that name already exists in the destination folder");
+            }
         }
 
         ImGui::EndDragDropTarget();
