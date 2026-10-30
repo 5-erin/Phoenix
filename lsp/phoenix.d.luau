@@ -1109,3 +1109,11 @@ declare Enum: {
 
 
 declare _RUNTIME: _RUNTIME
+
+
+declare _VMNAME: string
+declare function appendlog<T...>( ...: T... ): ()
+declare game: GameObject & EcDataModel
+declare function warn<T...>( ...: T... ): ()
+
+

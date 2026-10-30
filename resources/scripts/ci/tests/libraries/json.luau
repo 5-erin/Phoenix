@@ -1,5 +1,5 @@
-local Types = require("@ci/test-types.luau")
-local json = phoenix.json
+local Types = require("@ci/test-types")
+local json = require("@phoenix/json")
 
 return function(test: Types.Test, expect: Types.Expect)
 	test("Encode string", function()

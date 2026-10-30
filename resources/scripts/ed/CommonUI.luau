@@ -30,8 +30,10 @@ local Git = require("@ed/Git")
 local task = require("@std/task")
 local fs = require("@std/fs")
 
-local imgui = phoenix.imgui
-local json = phoenix.json
+local profiler = require("@phoenix/profiler")
+local imgui = require("@phoenix/imgui")
+local json = require("@phoenix/json")
+local xfs = require("@phoenix/fs")
 
 local HoveringOverMenuBar = false
 local HoveringOverRibbonTab = false
@@ -344,7 +346,7 @@ local function homeTab(_: number)
 
     if tabButton("Import Model", "@_etextures/editor-icons/Model.png") then
         task.defer(function()
-            local paths = phoenix.fs.promptopen(nil, { "*.gltf", "*.glb" }, "Models")
+            local paths = xfs.promptopen(nil, { "*.gltf", "*.glb" }, "Models")
 
             if paths[1] then
                 local importAction = History:TryBeginAction("Import Model")
@@ -553,7 +555,7 @@ local function findEnginePath(): string?
     if choice == 0 then
         return nil
     else
-        return phoenix.fs.promptopen()[1]
+        return xfs.promptopen()[1]
     end
 end
 
@@ -600,7 +602,7 @@ local function exportProject()
 
     imgui.openpopup("Export Project")
     local exportName = State.Project.Name
-    local exportDir = phoenix.fs.promptopenfolder("Choose export directory")
+    local exportDir = xfs.promptopenfolder("Choose export directory")
     local exportTo = `{exportDir}/{exportName}`
 
     if not exportDir then
@@ -626,7 +628,7 @@ local function exportProject()
         imgui.sameline()
 
         if imgui.button("...") then
-            exportDir = phoenix.fs.promptopenfolder("Change export directory")
+            exportDir = xfs.promptopenfolder("Change export directory")
         end
 
         keepOnlyScriptBytecode = imgui.checkbox("Export scripts as bytecode", keepOnlyScriptBytecode)
@@ -704,7 +706,7 @@ local function exportProject()
         local configPath = `{ exportTo }/resources/scripts/.config.luau`
         local configFile = fs.readFileToString(configPath)
         local substitutions = 0
-        configFile, substitutions = string.gsub(configFile, phoenix.fs.resolvepathabsolute(Configuration.StdPath), "./std")
+        configFile, substitutions = string.gsub(configFile, xfs.resolvepathabsolute(Configuration.StdPath), "./std")
 
         if substitutions == 0 then
             Engine:ShowMessageBox("Potential error", "@std was not linked, no possible substitutions were found in the resources/scripts/.config.luau file")
@@ -827,7 +829,7 @@ local function updateGitBranches()
 end
 
 function CommonUI.RenderMainMenuBar(dt: number)
-    debug.zonebegin()
+    profiler.zonebegin()
 
     if ErrorMessage.Queue[1] then
         local front = ErrorMessage.Queue[1]
@@ -888,7 +890,7 @@ function CommonUI.RenderMainMenuBar(dt: number)
             end
 
             if imgui.menuitem("Open Project folder") then
-                phoenix.fs.systemopen("@project")
+                xfs.systemopen("@project")
             end
         end
 
@@ -923,8 +925,8 @@ function CommonUI.RenderMainMenuBar(dt: number)
                             if buttonSelection == 1 then
                                 local prevName = State.Project.Name
 
-                                phoenix.fs.rename(`{ Preferences.ProjectsDirectory }/{ State.Project.Name }`, newProjectName)
-                                phoenix.fs.definealias("project", `{ Preferences.ProjectsDirectory }/{ newProjectName }`)
+                                xfs.rename(`{ Preferences.ProjectsDirectory }/{ State.Project.Name }`, newProjectName)
+                                xfs.definealias("project", `{ Preferences.ProjectsDirectory }/{ newProjectName }`)
 
                                 State.Project.Name = newProjectName
 
@@ -958,7 +960,7 @@ function CommonUI.RenderMainMenuBar(dt: number)
 
                             if buttonSelection == 1 then
                                 task.defer(function()
-                                    local path = phoenix.fs.promptopen(nil, { "*.png" , "*.jpg", "*.jpeg" }, "Images")[1]
+                                    local path = xfs.promptopen(nil, { "*.png" , "*.jpg", "*.jpeg" }, "Images")[1]
 
                                     if path then
                                         fs.remove("@project/icon.png")

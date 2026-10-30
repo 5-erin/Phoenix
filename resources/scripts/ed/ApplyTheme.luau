@@ -1,11 +1,11 @@
 -- ApplyTheme.luau, 06/06/2026
 type ThemeData = typeof(require("@ed/Theme"))
 
+local imgui = require("@phoenix/imgui")
+
 local ErrorMessage = require("@ed/ErrorMessage")
 local GetThemeData = require("@ed/GetThemeData")
 local Theme = require("@ed/Theme")
-
-local imgui = phoenix.imgui
 
 local BaseImGuiStyles = {
     Dark = "d",

@@ -1105,6 +1105,18 @@
   "@phoenix/global/_RUNTIME": {
     "documentation": "* Describes the Luau runtime"
   },
+  "@phoenix/global/_VMNAME": {
+    "documentation": "* A non-unique identifier for the current Luau VM"
+  },
+  "@phoenix/global/appendlog": {
+    "documentation": "* Same as `print`, but does not prefix the log message with `[INFO]`"
+  },
+  "@phoenix/global/game": {
+    "documentation": "* The GameObject acting as the Data Model of the Engine"
+  },
+  "@phoenix/global/warn": {
+    "documentation": "* Same as `print`, except generates a Warning message"
+  },
   "@phoenix/globaltype/Animation.Animation": {
     "documentation": "The animation file"
   },

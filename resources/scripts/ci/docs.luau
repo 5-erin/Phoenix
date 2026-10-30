@@ -392,12 +392,13 @@ local function dumpLibMembers(libm: { [string]: any }, t: { [string]: any }, lib
     local hasWholeDefinition = wholeDefinition ~= nil
 
     local isModule = string.find(libname, "@phoenix/") == 1
+    local shortName = if isModule then string.sub(libname, #("@phoenix/") + 1) else libname
 
     if isModule then
         definitionsFile ..= `--- { if typeof(lib.Description) == "table" then table.concat(lib.Description, "\n---\n--- ") else lib.Description }\n`
     end
 
-    definitionsFile ..= if isPhoenix then `{libname}: \{\n  ` else if hasWholeDefinition then `declare { libname }: { wholeDefinition }` else `declare { libname }: \{\n\n`
+    definitionsFile ..= if isPhoenix then `{libname}: \{\n  ` else if hasWholeDefinition then `declare { libname }: { wholeDefinition }` else if isModule then `type { shortName } = \{\n\n` else `declare { shortName }: \{\n\n`
 
     if not isPhoenix and hasWholeDefinition then
         return "", definitionsFile
@@ -1205,6 +1206,52 @@ for _, name in orderedLibraries do
     definitionsFile = documentLibrary(name, definitionsFile, false)
 end
 
+definitionsFile ..= "\n\n"
+
+for _, name in orderedGlobals do
+    local contents = docComments.ScriptEnv.Globals[name]
+
+    if not contents then
+        docWarn(`Missing doc entry for global '{ name }'`)
+        continue
+    end
+
+    if apiDump.ScriptEnv.Globals[name] == "function" then
+        local args = contents.In or ""
+        local returns = contents.Out or "()"
+
+        local generics = ""
+        if contents.Generics then
+            generics = `<{contents.Generics}>`
+        end
+
+        globals ..= `\`\`\`luau\nfunction { name }{generics}({ args }): { returns }\n\`\`\`\n`
+        definitionsFile ..= `declare function { name }{generics}( { args } ){ if #returns > 0 then ": " .. returns else "" }\n`
+    else
+        globals ..= `\`\`\`luau\n{ name }: { apiDump.ScriptEnv.Globals[name] }\n\`\`\`\n`
+        definitionsFile ..= `declare { name }: { apiDump.ScriptEnv.Globals[name] }\n`
+    end
+
+    local totalcomment = ""
+    for _, comment in (if typeof(contents.Description) == "table" then contents.Description else { contents.Description }) do
+        if not comment then
+            docWarn(`Missing doc comment for global '{ name }'`)
+        end
+
+        totalcomment ..= `* { comment }\n`
+    end
+    totalcomment = totalcomment:sub(1, #totalcomment - 1)
+
+    globals ..= totalcomment
+    documentationData[`@{DOCS_PREFIX}/global/{name}`] = {
+        documentation = totalcomment
+    }
+
+    globals ..= "\n"
+end
+
+definitionsFile ..= "\n\n"
+
 local scriptenv = datatypesPrologue .. datatypes .. librariesPrologue .. libraries .. globalsPrologue .. globals
 
 if not fs.exists(WIKI_PATH) then
@@ -1226,5 +1273,5 @@ print("Docs CI finish\n\n\n\n\n")
 
 if not _G.LspDefinitionsGeneratorDoNotShutdown then
     -- close when we're done
-    -- game:Close(if docgenWarned then 1 else 0)
+    game:Close(if docgenWarned then 1 else 0)
 end
