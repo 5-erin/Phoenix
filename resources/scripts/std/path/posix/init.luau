@@ -1,5 +1,6 @@
 local posixtypes = require("@self/types")
 local pathinterface = require("./pathinterface")
+local xfs = require("@phoenix/fs")
 
 export type Path = posixtypes.Path
 export type Pathlike = posixtypes.Pathlike
@@ -180,7 +181,7 @@ end
 function posix.resolve(...: Pathlike): Path
 	local parts = { ... }
 	if #parts == 0 then
-		return posix.parse(phoenix.fs.cwd())
+		return posix.parse(xfs.cwd())
 	end
 
 	local path = posix.parse(parts[#parts])
@@ -201,7 +202,7 @@ function posix.resolve(...: Pathlike): Path
 	end
 
 	if not posix.isAbsolute(path) then
-		local cwd = posix.parse(phoenix.fs.cwd())
+		local cwd = posix.parse(xfs.cwd())
 		joinHelper(cwd, path)
 		path = cwd
 	end

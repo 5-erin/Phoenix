@@ -4,6 +4,7 @@
 -- Provides process-related utility functions that handles file paths as path types instead of strings
 
 local pathlib = require("@std/path")
+local xfs = require("@phoenix/fs")
 
 local processlib = {}
 
@@ -72,12 +73,12 @@ export type Pathlike = pathlib.Pathlike
 
 --- Returns the current user's home directory as a `Path`.
 function processlib.homedir(): Path
-    return pathlib.parse(phoenix.fs.home())
+    return pathlib.parse(xfs.home())
 end
 
 --- Returns the current working directory as a `Path`.
 function processlib.cwd(): Path
-    return pathlib.parse(phoenix.fs.cwd())
+    return pathlib.parse(xfs.cwd())
 end
 
 --- Runs the program given by `args[1]` with the remaining entries as arguments.
@@ -89,7 +90,7 @@ end
 --- Runs `command` through the system shell. Returns the process result.
 function processlib.system(command: string, options: ProcessSystemOptions?): ProcessResult
     return {
-        stdout = phoenix.fs.execute(command),
+        stdout = xfs.execute(command),
         stderr = "",
 
         ok = true,

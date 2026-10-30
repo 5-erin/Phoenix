@@ -3,6 +3,7 @@ local DefaultThemes = require("@ed/DefaultThemes")
 local ErrorMessage = require("@ed/ErrorMessage")
 
 local json = require("@phoenix/json")
+local xfs = require("@phoenix/fs")
 
 type ThemeData = index<typeof(DefaultThemes), string>
 
@@ -24,7 +25,7 @@ local function getThemeData(Name: string): ThemeData
             end
         end
     else
-        local themeContents, err = phoenix.fs.read(`./editor/{ Name }`)
+        local themeContents, err = xfs.read(`./editor/{ Name }`)
         if not themeContents then
             ErrorMessage.Push(`Failed to load theme file: { err }`)
             return DefaultThemes.Dark

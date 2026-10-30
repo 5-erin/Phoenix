@@ -661,8 +661,6 @@ local function exportProject()
         imgui.setcursorposition(cpos.x + cax - 50, cpos.y)
 
         if imgui.button("Export") then
-            print("Export button clicked")
-
             if fs.type(exportTo) == "dir" then
                 local chosenOption = Engine:ShowMessageBox(
                     "Export will overwrite",
@@ -714,6 +712,20 @@ local function exportProject()
 
         fs.writeStringToFile(configPath, configFile)
         fs.copy(Configuration.StdPath, `{ exportTo }/resources/scripts/std`)
+    end
+
+    if not fs.exists(`{ exportTo }/resources/scripts/phoenix`) then
+        local configPath = `{ exportTo }/resources/scripts/.config.luau`
+        local configFile = fs.readFileToString(configPath)
+        local substitutions = 0
+        configFile, substitutions = string.gsub(configFile, xfs.resolvepathabsolute(Configuration.PhoenixPath), "./phoenix")
+
+        if substitutions == 0 then
+            Engine:ShowMessageBox("Potential error", "@phoenix was not linked, no possible substitutions were found in the resources/scripts/.config.luau file")
+        end
+
+        fs.writeStringToFile(configPath, configFile)
+        fs.copy(Configuration.PhoenixPath, `{ exportTo }/resources/scripts/phoenix`)
     end
 
     fs.copy(enginePath, `{exportTo}/{State.Project.Name}{if enginePath:find(".exe") then ".exe" else ""}`)

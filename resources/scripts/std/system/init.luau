@@ -7,12 +7,13 @@ local path = require("@std/path")
 local platform = require("@self/platform")
 
 local systemimpl = require("@phoenix/system")
+local xfs = require("@phoenix/fs")
 
 local systemlib = {}
 
 --- Returns the path of the system's temporary directory.
 function systemlib.tmpdir(): path.Path
-	return path.parse(phoenix.fs.tempdir())
+	return path.parse(xfs.tempdir())
 end
 
 --- CPU information for a single logical processor, including model, speed, and time-usage breakdown.
