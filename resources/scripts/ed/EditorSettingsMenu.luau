@@ -13,8 +13,9 @@ local Theme = require("@ed/Theme")
 
 local fs = require("@std/fs")
 
-local imgui = phoenix.imgui
-local json = phoenix.json
+local imgui = require("@phoenix/imgui")
+local json = require("@phoenix/json")
+local xfs = require("@phoenix/fs")
 
 local SettingsSectionHorizontalSize = 0
 local LastUpdatedThemes = 0
@@ -297,9 +298,9 @@ local function renderProjectSection()
     imgui.setitemtooltip(Preferences.ProjectsDirectory)
 
     if imgui.button("Change") then
-        local newDir = phoenix.fs.promptopenfolder("Select Projects directory", Preferences.ProjectsDirectory)
+        local newDir = xfs.promptopenfolder("Select Projects directory", Preferences.ProjectsDirectory)
 
-        if newDir and phoenix.fs.resolvepathabsolute(newDir) ~= phoenix.fs.resolvepathabsolute(Preferences.ProjectsDirectory) then
+        if newDir and xfs.resolvepathabsolute(newDir) ~= xfs.resolvepathabsolute(Preferences.ProjectsDirectory) then
             local moveSuccess, err = pcall(function()
                 for _, entry in fs.listDirectory(Preferences.ProjectsDirectory) do
                     if entry.type ~= "dir" then
@@ -316,7 +317,7 @@ local function renderProjectSection()
             if not moveSuccess then
                 Engine:ShowMessageBox(
                     "Failed to move projects",
-                    `Failed to move your projects from '{ phoenix.fs.resolvepathabsolute(Preferences.ProjectsDirectory) }' to '{ phoenix.fs.resolvepathabsolute(newDir) }'.\n\nError: { err }\n\n`
+                    `Failed to move your projects from '{ xfs.resolvepathabsolute(Preferences.ProjectsDirectory) }' to '{ xfs.resolvepathabsolute(newDir) }'.\n\nError: { err }\n\n`
                     .. `Your Projects directory has not been updated.`,
                     "ok",
                     "error"

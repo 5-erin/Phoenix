@@ -2,7 +2,7 @@
 local DeveloperTools = game:GetService("DeveloperTools")
 local Collections = game:GetService("Collections")
 
-local imgui = phoenix.imgui
+local imgui = require("@phoenix/imgui")
 
 local Viewer = {}
 Viewer.Open = false

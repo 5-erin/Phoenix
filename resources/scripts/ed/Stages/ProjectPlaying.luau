@@ -14,6 +14,8 @@ local State = require("@ed/State")
 
 local ProjectEditing = require("@ed/Stages/ProjectEditing")
 
+local profiler = require("@phoenix/profiler")
+
 local GameClosedConnection = nil
 
 local function valuesOf<I, V>(t: { read [I]: V }): { V }
@@ -137,13 +139,13 @@ function ProjectPlaying.Leave(_new)
 end
 
 function ProjectPlaying.Render(DeltaTime: number)
-    debug.zonebegin()
+    profiler.zoneBegin()
 
     CommonUI.RenderMainMenuBar(DeltaTime)
     CommonUI.RenderViewport(DeltaTime)
     CoreTools.Update(State.Project, { KeepGizmoInView = false }, State.ViewportRenderPosition, State.ViewportRenderSize, DeltaTime)
 
-    debug.zoneend()
+    profiler.zoneEnd()
 end
 
 return ProjectPlaying

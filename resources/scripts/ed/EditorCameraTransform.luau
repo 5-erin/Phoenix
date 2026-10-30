@@ -3,7 +3,7 @@ local EditorCameraTransform = {}
 
 local fs = require("@std/fs")
 
-local json = phoenix.json
+local json = require("@phoenix/json")
 
 type SavedEditorCamera = {
     FieldOfView: number,

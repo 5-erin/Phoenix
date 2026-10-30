@@ -15,7 +15,7 @@ local State = require("@ed/State")
 
 local task = require("@std/task")
 
-local imgui = phoenix.imgui
+local imgui = require("@phoenix/imgui")
 
 type LogMessageComponent = {
     String: string,

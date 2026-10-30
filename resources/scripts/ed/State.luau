@@ -11,9 +11,9 @@ local Configuration = require("@ed/Configuration")
 local Preferences = require("@ed/Preferences")
 local Types = require("@ed/Types")
 
-local imgui = phoenix.imgui
-local json = phoenix.json
-local fs = phoenix.fs
+local imgui = require("@phoenix/imgui")
+local json = require("@phoenix/json")
+local fs = require("@phoenix/fs")
 
 export type CachedProjectInfo = {
     Name: string,

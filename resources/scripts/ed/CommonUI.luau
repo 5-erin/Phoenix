@@ -829,7 +829,7 @@ local function updateGitBranches()
 end
 
 function CommonUI.RenderMainMenuBar(dt: number)
-    profiler.zonebegin()
+    profiler.zoneBegin()
 
     if ErrorMessage.Queue[1] then
         local front = ErrorMessage.Queue[1]
@@ -1317,11 +1317,11 @@ function CommonUI.RenderMainMenuBar(dt: number)
         CommonUI.SaveSettings()
     end
 
-    debug.zoneend()
+    profiler.zoneEnd()
 end
 
 function CommonUI.RenderBottomBar()
-    debug.zonebegin()
+    profiler.zoneBegin()
 
     local w = Renderer.Resolution
 
@@ -1359,11 +1359,11 @@ function CommonUI.RenderBottomBar()
 
     imgui.endw()
 
-    debug.zoneend()
+    profiler.zoneEnd()
 end
 
 function CommonUI.RenderViewport(DeltaTime: number)
-    debug.zonebegin()
+    profiler.zoneBegin()
 
     if State.CurrentStage == "ProjectEditing" and State.Project.Workspace then
         local mouseVec = Workspace:ScreenPointToVector(PlayerInput:GetCursorPosition(), 1000)
@@ -1450,7 +1450,7 @@ function CommonUI.RenderViewport(DeltaTime: number)
     if not render then
         PlayerInput:SetViewportInputRect(vector.zero, vector.create(1, 1))
         imgui.endw()
-        debug.zoneend()
+        profiler.zoneEnd()
         return
     end
 
@@ -1486,7 +1486,7 @@ function CommonUI.RenderViewport(DeltaTime: number)
     imgui.image("phoenix://framebuffer/main", nil, true)
 
     imgui.endw()
-    debug.zoneend()
+    profiler.zoneEnd()
 end
 
 CommonUI.GetCenteredX = getCenteredX

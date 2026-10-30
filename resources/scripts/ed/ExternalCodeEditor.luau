@@ -13,7 +13,8 @@ local EditorSettingsMenu = require("@ed/EditorSettingsMenu")
 local ErrorMessage = require("@ed/ErrorMessage")
 local Preferences = require("@ed/Preferences")
 
-local json = phoenix.json
+local json = require("@phoenix/json")
+local xfs = require("@phoenix/fs")
 
 function ExternalCodeEditor.Open(ProjectName: string)
     if not Preferences.CodeEditorPath or #Preferences.CodeEditorPath == 0 then
@@ -33,7 +34,7 @@ function ExternalCodeEditor.Open(ProjectName: string)
             local folderPath = `@project/.vscode`
 
             if fs.type(folderPath) ~= "dir" then
-                local lsp = phoenix.fs.resolvepathabsolute("./lsp")
+                local lsp = xfs.resolvepathabsolute("./lsp")
 
                 local data = {
                     ["luau-lsp.types.definitionFiles"] = {
@@ -54,7 +55,7 @@ function ExternalCodeEditor.Open(ProjectName: string)
             end
         end
 
-        local result = process.system(`{ Preferences.CodeEditorPath } "{ phoenix.fs.resolvepathabsolute("@project") }"`).stdout
+        local result = process.system(`{ Preferences.CodeEditorPath } "{ xfs.resolvepathabsolute("@project") }"`).stdout
 
         if #result > 1 then
             warn("Open code editor result: ", result)

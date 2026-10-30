@@ -20,8 +20,9 @@ local Output = require("@ed/Output")
 local State = require("@ed/State")
 local Types = require("@ed/Types")
 
-local json = phoenix.json
-local fs = phoenix.fs
+local profiler = require("@phoenix/profiler")
+local json = require("@phoenix/json")
+local fs = require("@phoenix/fs")
 
 local ProjectClosedByDataModelConnection = nil
 local LastSelectedInEditMode = {}
@@ -219,7 +220,7 @@ end
 local ShowedAutosaveDelayedMessage = false
 
 function ProjectEditing.Render(DeltaTime: number)
-    debug.zonebegin()
+    profiler.zoneBegin()
 
     CommonUI.RenderMainMenuBar(DeltaTime)
     CommonUI.RenderViewport(DeltaTime)
@@ -253,7 +254,7 @@ function ProjectEditing.Render(DeltaTime: number)
         end
     end
 
-    debug.zoneend()
+    profiler.zoneEnd()
 end
 
 function ProjectEditing.Leave(NextStage: Types.Stage)

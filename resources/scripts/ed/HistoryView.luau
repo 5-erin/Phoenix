@@ -3,7 +3,7 @@ local History = game:GetService("History")
 
 local ErrorMessage = require("./ErrorMessage")
 
-local imgui = phoenix.imgui
+local imgui = require("@phoenix/imgui")
 
 local Viewer = {}
 Viewer.Open = false

@@ -14,10 +14,11 @@ local Output = require("@ed/Output")
 local State = require("@ed/State")
 local Theme = require("@ed/Theme")
 
-local imgui = phoenix.imgui
-local task = phoenix.task
-local json = phoenix.json
-local fs = phoenix.fs
+local profiler = require("@phoenix/profiler")
+local imgui = require("@phoenix/imgui")
+local task = require("@phoenix/task")
+local json = require("@phoenix/json")
+local fs = require("@phoenix/fs")
 
 function SelectProject.Enter(_prev)
     if not fs.isfile(Configuration.RecentProjectsPath) then
@@ -274,7 +275,7 @@ local SelectedProjectsCategory = 1
 local PrevSelectedProjectsCategory = 0
 
 function SelectProject.Render(DeltaTime: number)
-    debug.zonebegin()
+    profiler.zoneBegin()
 
     if not CommonUI.EnableBottomBarInStartPage and imgui.beginfullscreen("Start Page", 0, 18) then
         local startPos = imgui.cursorposition()
@@ -341,7 +342,7 @@ function SelectProject.Render(DeltaTime: number)
         CommonUI.RenderBottomBar()
     end
 
-    debug.zoneend()
+    profiler.zoneEnd()
 end
 
 return SelectProject

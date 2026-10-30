@@ -2,7 +2,7 @@
 local DefaultThemes = require("@ed/DefaultThemes")
 local ErrorMessage = require("@ed/ErrorMessage")
 
-local json = phoenix.json
+local json = require("@phoenix/json")
 
 type ThemeData = index<typeof(DefaultThemes), string>
 

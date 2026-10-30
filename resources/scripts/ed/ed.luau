@@ -9,12 +9,14 @@ local process = require("@std/process")
 local task = require("@std/task")
 local fs = require("@std/fs")
 
-local imgui = phoenix.imgui
-local json = phoenix.json
+local profiler = require("@phoenix/profiler")
+local imgui = require("@phoenix/imgui")
+local json = require("@phoenix/json")
+local xfs = require("@phoenix/fs")
 
-phoenix.fs.definealias("_editres", "./resources")
-phoenix.fs.definealias("_etextures", "@_editres/textures")
-phoenix.fs.definealias("base", "./resources")
+xfs.definealias("_editres", "./resources")
+xfs.definealias("_etextures", "@_editres/textures")
+xfs.definealias("base", "./resources")
 
 local PluginManager = require("@ed/PluginManager")
 local ErrorMessage = require("@ed/ErrorMessage")
@@ -156,7 +158,7 @@ local function handleUndoRedoKeybinds()
 end
 
 local function editorFrame(State, DeltaTime)
-    debug.zonebegin()
+    profiler.zoneBegin()
 
     if not History.IsRecordingAction then
         if State.CurrentStage == "ProjectEditing" then
@@ -177,11 +179,11 @@ local function editorFrame(State, DeltaTime)
         error(`Unexpected editor stage '{ State.CurrentStage }'`)
     end
 
-    debug.zoneend()
+    profiler.zoneEnd()
 end
 
 local function stageUpdate(State, DeltaTime)
-    debug.zonebegin()
+    profiler.zoneBegin()
 
     local s, e = (xpcall::any)(function(State, dt)
         editorFrame(State, dt)
@@ -191,7 +193,7 @@ local function stageUpdate(State, DeltaTime)
         warn(`editorFrame error: {e}`)
     end
 
-    debug.zoneend()
+    profiler.zoneEnd()
 end
 
 local EditorFrameConnection = game.OnFrameBegin:Connect(function(dt)
@@ -289,7 +291,7 @@ if loadProjectIndex then
     if not name then
         Logging:Write("`--project` specified without the project name!", Enum.LogType.Error)
     else
-        local checkPath = phoenix.fs.resolvepathabsolute(`{ Preferences.ProjectsDirectory }/{ name }`)
+        local checkPath = xfs.resolvepathabsolute(`{ Preferences.ProjectsDirectory }/{ name }`)
 
         if fs.type(checkPath) == "dir" then
             State:OpenProject(name)

@@ -15,7 +15,8 @@ CoreTools.CameraModel = assert(cam)
 
 local Types = require("./Types")
 
-local imgui = phoenix.imgui
+local profiler = require("@phoenix/profiler")
+local imgui = require("@phoenix/imgui")
 
 local GizmoActive = true
 local GizmoMode = 1
@@ -473,11 +474,11 @@ local function update(Project: Types.Project, EditorPreferences, ViewportRenderP
 end
 
 function CoreTools.Update(Project: Types.Project, EditorPreferences: { read KeepGizmoInView: boolean }, ViewportRenderPosition: vector, ViewportRenderSize: vector, DeltaTime: number)
-    debug.zonebegin("CoreTools.Update")
+    profiler.zoneBegin("CoreTools.Update")
 
     local success, err = pcall(update, Project, EditorPreferences, ViewportRenderPosition, ViewportRenderSize, DeltaTime)
 
-    debug.zoneend()
+    profiler.zoneEnd()
 
     if not success then
         warn(err)

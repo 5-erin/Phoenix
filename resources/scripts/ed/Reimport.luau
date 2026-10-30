@@ -21,7 +21,8 @@ local Preferences = require("@ed/Preferences")
 -- local json = require("@std/json")
 local fs = require("@std/fs")
 
-local json = phoenix.json
+local json = require("@phoenix/json")
+local xfs = require("@phoenix/fs")
 
 if fs.type("./editor/models.json") == "file" then
     Reimport.ModelModifiedTimes = json.parse(assert(fs.readFileToString("./editor/models.json"))) :: { [string]: number }
@@ -135,7 +136,7 @@ function Reimport.WatchModel(reimportable: GameObject & EcModel)
         Models = { reimportable },
         Disconnect = dummyDisconnect
     }
-    watcher.Disconnect = phoenix.fs.watch(reimportable.ImportPath, wrapReimportWatcher(reimportable, watcher))
+    watcher.Disconnect = xfs.watch(reimportable.ImportPath, wrapReimportWatcher(reimportable, watcher))
 
     Reimport.Watchers[reimportable.ImportPath] = watcher
 end

@@ -11,8 +11,11 @@ type ToolbarButton = Types.ToolbarButton
 -- local json = require("@std/json")
 local fs = require("@std/fs")
 
-local imgui = phoenix.imgui
-local json = phoenix.json
+local profiler = require("@phoenix/profiler")
+local xtask = require("@phoenix/task")
+local imgui = require("@phoenix/imgui")
+local json = require("@phoenix/json")
+local xfs = require("@phoenix/fs")
 
 local PluginManager = {}
 PluginManager.Plugins = {} :: { PluginInternal }
@@ -96,15 +99,15 @@ end
 
 local function setPluginAlias(ParentPath: string?)
     if ParentPath then
-        phoenix.fs.definealias("plugin", ParentPath)
+        xfs.definealias("plugin", ParentPath)
     end
 end
 
 local function loadPlugin_(Path, ParentPath: string?)
-    local co, err = phoenix.task.loadfile(Path)
+    local co, err = xtask.loadfile(Path)
 
     if co then
-        phoenix.task.setglobal(co, "plugin", {
+        xtask.setglobal(co, "plugin", {
             ProjectDatamodel = State.Project.DataModel,
             ProjectWorkspace = State.Project.Workspace,
         })
@@ -118,7 +121,7 @@ local function loadPlugin_(Path, ParentPath: string?)
             --table.freeze(data)
 
             if typeof(data.Icon) == "string" then
-                data.Icon = phoenix.fs.resolvepath(data.Icon)
+                data.Icon = xfs.resolvepath(data.Icon)
             end
 
             data._thread = co
@@ -131,7 +134,7 @@ local function loadPlugin_(Path, ParentPath: string?)
             warn(`PluginManager: Failed to execute plugin '{ Path }': { data }`)
         end
 
-        phoenix.fs.removealias("plugin")
+        xfs.removealias("plugin")
     else
         warn(`PluginManager: Failed to load plugin '{ Path }': { err }`)
     end
@@ -189,7 +192,7 @@ function PluginManager.Shutdown()
         if getPluginSettings(plugin).Enabled and plugin.OnShutdown then
             setPluginAlias(plugin.ParentPath)
             plugin:OnShutdown()
-            phoenix.fs.removealias("plugin")
+            xfs.removealias("plugin")
             coroutine.close(plugin._thread)
         end
     end
@@ -202,7 +205,7 @@ function PluginManager.OnEditorStageChanged(OldStage: EditorStage, NewStage: Edi
         if getPluginSettings(plugin).Enabled and plugin.OnEditorStageChanged and table.find(plugin.ActiveStages, NewStage) then
             setPluginAlias(plugin.ParentPath)
             plugin:OnEditorStageChanged(OldStage, NewStage)
-            phoenix.fs.removealias("plugin")
+            xfs.removealias("plugin")
         end
     end
 end
@@ -210,17 +213,17 @@ end
 function PluginManager.OnUpdate(DeltaTime: number, CurrentStage: EditorStage)
     for _, plugin in PluginManager.Plugins do
         if getPluginSettings(plugin).Enabled and plugin.OnUpdate and table.find(plugin.ActiveStages, CurrentStage) then
-            debug.zonebegin(plugin.Name)
+            profiler.zoneBegin(plugin.Name)
 
             setPluginAlias(plugin.ParentPath)
             local s, e = pcall(plugin.OnUpdate, plugin, DeltaTime)
-            phoenix.fs.removealias("plugin")
+            xfs.removealias("plugin")
 
             if not s then
                 warn(`Plugin '{ plugin.Name }' errored on update: { e }`)
             end
 
-            debug.zoneend()
+            profiler.zoneEnd()
         end
     end
 
@@ -259,8 +262,8 @@ function PluginManager.GetToolbarButtons(CurrentStage: EditorStage): { ToolbarBu
             for _, t in plugin.ToolbarButtons do
                 if t.Icon and t.Icon:find("@") then
                     setPluginAlias(plugin.ParentPath)
-                    t.Icon = phoenix.fs.resolvepath(t.Icon)
-                    phoenix.fs.removealias("plugin")
+                    t.Icon = xfs.resolvepath(t.Icon)
+                    xfs.removealias("plugin")
                 end
 
                 table.insert(buttons, t)
