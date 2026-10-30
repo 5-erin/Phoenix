@@ -397,7 +397,11 @@ local function dumpLibMembers(libm: { [string]: any }, t: { [string]: any }, lib
         definitionsFile ..= `--- { if typeof(lib.Description) == "table" then table.concat(lib.Description, "\n---\n--- ") else lib.Description }\n`
     end
 
-    definitionsFile ..= if isPhoenix then `{libname}: \{\n  ` else `declare { libname }: \{\n\n`
+    definitionsFile ..= if isPhoenix then `{libname}: \{\n  ` else if hasWholeDefinition then `declare { libname }: { wholeDefinition }` else `declare { libname }: \{\n\n`
+
+    if not isPhoenix and hasWholeDefinition then
+        return "", definitionsFile
+    end
 
     local str = ""
     local first = true

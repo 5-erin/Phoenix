@@ -251,9 +251,6 @@ declare Color: {    --- Returns a Color with the provided R, G, and B values
 declare extern type ColorGradient with
 end
 
-declare extern type Component with
-end
-
 declare extern type EventConnection with
   function Disconnect(self): (  )
   Connected: boolean
@@ -333,9 +330,6 @@ end
 declare extern type NumberGradient with
 end
 
-declare extern type Query with
-end
-
 declare extern type SharedBuffer with
   Pull: (SharedBuffer, Start: number | --[[integer |]] nil, Length: number | --[[integer |]] nil) -> buffer
   Push: (SharedBuffer, Source: buffer, Start: number | --[[integer |]] nil, Length: number | --[[integer |]] nil) -> ()
@@ -344,12 +338,6 @@ end
 
 declare extern type VectorGradient with
 end
-
-declare extern type World with
-end
-
-
-
 
 export type GameObject = {
   Enabled: boolean,
@@ -809,6 +797,9 @@ type Creatables = {
 
 
 
+
+
+
 declare extern type EnumCollisionType extends EnumItem with end
 export type EnumListCollisionType = {
   read Cube: EnumCollisionType,
@@ -1117,9 +1108,4 @@ declare Enum: {
 }
 
 
-declare _RUNTIME: {
-
-    --- The name of the runtime
-    --- URL associated with the runtime
-    --- Version information
-
+declare _RUNTIME: _RUNTIME

@@ -624,9 +624,6 @@
         "zoneend": "function",
         "zonetext": "function"
       },
-      "@phoenix/schedule": {
-        "frame": "function"
-      },
       "@phoenix/system": {
         "freememory": "function",
         "hostname": "function",

@@ -46,11 +46,7 @@ static const inline std::unordered_map<std::string_view, lua_CFunction> BuiltinL
 	{ "task", luhxopen_task },
 	{ "parallel", luhxopen_parallel },
 	{ "system", luhxopen_system },
-<<<<<<< HEAD
-=======
-	{ "schedule", luhxopen_schedule },
 	{ "profiler", luhxopen_profiler },
->>>>>>> 2fa71ce (add `@phoenix/profiler`)
 };
 
 #define LUHX_GAMEOBJECTLIBNAME "GameObject"
