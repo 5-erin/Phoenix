@@ -238,7 +238,7 @@ static void defineRuntime(lua_State* L)
     lua_pushliteral(L, "phoenix");
     lua_setfield(L, -2, "name");
 
-    lua_pushliteral(L, "https://github.com/PhoenixWhitefire/PhoenixEngine");
+    lua_pushliteral(L, "https://github.com/5-erin/Phoenix");
     lua_setfield(L, -2, "url");
 
     lua_createtable(L, 0, 2);
@@ -248,7 +248,7 @@ static void defineRuntime(lua_State* L)
 
     lua_createtable(L, 0, 2);
 
-    lua_pushliteral(L, "https://github.com/PhoenixWhitefire/PhoenixEngine");
+    lua_pushliteral(L, "https://github.com/5-erin/Phoenix");
     lua_setfield(L, -2, "url");
 
     lua_pushstring(L, GetEngineCommitHash());

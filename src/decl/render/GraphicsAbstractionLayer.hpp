@@ -25,7 +25,7 @@ public:
 	GraphicsLayer(
 		bool* WasSuccess,
 		GraphicsApi ForceApi = GraphicsApi::Auto,
-		const char* WindowTitle = "PhoenixEngine",
+		const char* WindowTitle = "Phoenix",
 		int WindowSizeX = 1400, int WindowSizeY = 700
 	);
 

@@ -105,14 +105,14 @@ jobs:
       if: runner.os == 'Windows'
       shell: cmd
       run: |
-        move "build\\${{ matrix.build_type }}\\PhoenixEngine.exe" ".\\PhoenixEngine.exe"
+        move "build\\${{ matrix.build_type }}\\Phoenix.exe" ".\\Phoenix.exe"
         move ".github\\wiki" ".\\wiki"
 
     - name: Move executable and Wiki (Linux)
       if: runner.os == 'Linux'
       run: |
-        mv "build/${{ matrix.build_type }}/PhoenixEngine" "./PhoenixEngine"
-        mv "build/${{ matrix.build_type }}/PhoenixEngine.debug" "./PhoenixEngine.debug"
+        mv "build/${{ matrix.build_type }}/Phoenix" "./Phoenix"
+        mv "build/${{ matrix.build_type }}/Phoenix.debug" "./Phoenix.debug"
         mv ".github/wiki" "./wiki"
 
     - name: Upload build artifact (Windows)
@@ -133,7 +133,7 @@ jobs:
           Vendor/tracy/profiler/build/Release/tracy-profiler.exe
           README.md
           ADDITIONAL-COPYRIGHT-NOTICES.txt
-          PhoenixEngine.exe
+          Phoenix.exe
         retention-days: 7
 
     - name: Upload build artifact (Ubuntu)
@@ -154,7 +154,7 @@ jobs:
           Vendor/tracy/profiler/build/tracy-profiler
           README.md
           ADDITIONAL-COPYRIGHT-NOTICES.txt
-          PhoenixEngine
+          Phoenix
         retention-days: 7
 
     - name: Setup VS Dev environment (Windows)
@@ -165,23 +165,23 @@ jobs:
       if: runner.os == 'Windows'
       shell: cmd
       run: |
-        "PhoenixEngine.exe" --headless --tool scripts/ci/docs.luau
+        "Phoenix.exe" --headless --tool scripts/ci/docs.luau
 
     - name: Test (Windows)
       if: runner.os == 'Windows'
       shell: cmd
       run: |
-        "PhoenixEngine.exe" --headless --tool scripts/ci/tests.luau
-        "PhoenixEngine.exe" --headless -ed_ci
+        "Phoenix.exe" --headless --tool scripts/ci/tests.luau
+        "Phoenix.exe" --headless -ed_ci
 
     - name: Doc Gen (Ubuntu)
       if: runner.os == 'Linux'
       shell: bash
-      run: "./PhoenixEngine --headless --tool scripts/ci/docs.luau"
+      run: "./Phoenix --headless --tool scripts/ci/docs.luau"
 
     - name: Test (Ubuntu)
       if: runner.os == 'Linux'
       shell: bash
       run: |
-        ./PhoenixEngine --headless --tool scripts/ci/tests.luau
-      # ./PhoenixEngine --headless -ed_ci
+        ./Phoenix --headless --tool scripts/ci/tests.luau
+      # ./Phoenix --headless -ed_ci

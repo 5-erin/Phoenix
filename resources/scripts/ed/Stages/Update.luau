@@ -34,12 +34,12 @@ local function runUpdate()
 
     local headers = {
         ["Authorization"] = `Bearer { updaterGitHubToken }`,
-        ["User-Agent"] = "PhoenixEngine/EditorUpdate"
+        ["User-Agent"] = "5-erin.Phoenix.EditorUpdate"
     }
 
     updaterLog ..= "Finding latest workflow run...\n"
     local workflowRunResponse = Network:MakeHttpRequestAsync({
-        Url = "https://api.github.com/repos/PhoenixWhitefire/PhoenixEngine/actions/workflows/cmake-multi-platform.yml/runs",
+        Url = "https://api.github.com/repos/5-erin/Phoenix/actions/workflows/cmake-multi-platform.yml/runs",
         Headers = headers
     })
 

@@ -3,7 +3,7 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
-# Phoenix Engine
+# Phoenix
 desktop.ini
 *.lnk
 *.zip

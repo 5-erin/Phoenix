@@ -39,8 +39,6 @@
 #include "FileRW.hpp"
 #include "Log.hpp"
 
-LUAU_FASTFLAG(LuauEnumMoreEdges)
-
 struct LuauType
 {
     LuauType(lua_Type BaseType)
@@ -97,7 +95,6 @@ static ScriptEngine* Instance = nullptr;
 ScriptEngine::ScriptEngine()
 {
     assert(!Instance);
-    FFlag::LuauEnumMoreEdges.value = true;
 }
 
 ScriptEngine::~ScriptEngine()

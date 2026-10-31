@@ -238,11 +238,11 @@ function State.ChangeStageTo(NewStage: Types.Stage)
     State.CurrentStage = NewStage
 
     if NewStage == "ProjectEditing" then
-        Engine:SetWindowTitle(`PhoenixEngine - Editing { State.Project.Name }`)
+        Engine:SetWindowTitle(`Phoenix - Editing { State.Project.Name }`)
     elseif NewStage == "ProjectPlaying" then
-        Engine:SetWindowTitle(`PhoenixEngine - Playtesting { State.Project.Name }`)
+        Engine:SetWindowTitle(`Phoenix - Playtesting { State.Project.Name }`)
     else
-        Engine:SetWindowTitle("PhoenixEngine")
+        Engine:SetWindowTitle("Phoenix")
     end
 end
 

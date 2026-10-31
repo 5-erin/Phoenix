@@ -2,16 +2,16 @@
 
 set(PHX_TRACY_LIB_PATH Vendor/tracy/${PHX_BUILD_TYPE}/TracyClient)
 
-target_compile_options(PhoenixEngine PRIVATE $<$<CONFIG:ReleaseTSan>:-O3>)
-target_compile_options(PhoenixEngine PRIVATE $<$<CONFIG:ReleaseAUSan>:-O3>)
-target_compile_options(PhoenixEngine PRIVATE $<$<CONFIG:Release>:-O3 -g>)
-target_compile_options(PhoenixEngine PRIVATE $<$<CONFIG:DebugTSan>:-O0>)
-target_compile_options(PhoenixEngine PRIVATE $<$<CONFIG:DebugTSan>:-g3>)
-target_compile_options(PhoenixEngine PRIVATE $<$<CONFIG:Debug>:-O0>)
-target_compile_options(PhoenixEngine PRIVATE $<$<CONFIG:Debug>:-g3>)
-target_compile_options(PhoenixEngine PRIVATE -MP)
+target_compile_options(Phoenix PRIVATE $<$<CONFIG:ReleaseTSan>:-O3>)
+target_compile_options(Phoenix PRIVATE $<$<CONFIG:ReleaseAUSan>:-O3>)
+target_compile_options(Phoenix PRIVATE $<$<CONFIG:Release>:-O3 -g>)
+target_compile_options(Phoenix PRIVATE $<$<CONFIG:DebugTSan>:-O0>)
+target_compile_options(Phoenix PRIVATE $<$<CONFIG:DebugTSan>:-g3>)
+target_compile_options(Phoenix PRIVATE $<$<CONFIG:Debug>:-O0>)
+target_compile_options(Phoenix PRIVATE $<$<CONFIG:Debug>:-g3>)
+target_compile_options(Phoenix PRIVATE -MP)
 
-target_compile_options(PhoenixEngine PRIVATE
+target_compile_options(Phoenix PRIVATE
     -Wall -Wpedantic
     -Werror
 
@@ -22,18 +22,18 @@ target_compile_options(PhoenixEngine PRIVATE
 # including Vendor/luau/Ast/include/luau/Ast.h
 set_property(SOURCE src/impl/script/ScriptEngine.cpp PROPERTY COMPILE_OPTIONS "-Wno-unused-parameter")
 
-target_compile_options(PhoenixEngine PRIVATE $<$<CONFIG:ReleaseTSan>:-fsanitize=thread>)
-target_compile_options(PhoenixEngine PRIVATE $<$<CONFIG:DebugTSan>:-fsanitize=thread>)
-target_compile_options(PhoenixEngine PRIVATE $<$<CONFIG:Debug>:-fsanitize=address,undefined>)
-target_compile_options(PhoenixEngine PRIVATE $<$<OR:$<CONFIG:Debug>,$<CONFIG:ReleaseAUSan>>:-fsanitize=address,undefined>)
+target_compile_options(Phoenix PRIVATE $<$<CONFIG:ReleaseTSan>:-fsanitize=thread>)
+target_compile_options(Phoenix PRIVATE $<$<CONFIG:DebugTSan>:-fsanitize=thread>)
+target_compile_options(Phoenix PRIVATE $<$<CONFIG:Debug>:-fsanitize=address,undefined>)
+target_compile_options(Phoenix PRIVATE $<$<OR:$<CONFIG:Debug>,$<CONFIG:ReleaseAUSan>>:-fsanitize=address,undefined>)
 
-target_link_options(PhoenixEngine PRIVATE $<$<CONFIG:ReleaseTSan>:-flto -fsanitize=thread>)
-target_link_options(PhoenixEngine PRIVATE $<$<CONFIG:DebugTSan>:-fsanitize=thread>)
-target_link_options(PhoenixEngine PRIVATE $<$<CONFIG:Release>:-flto>)
-target_link_options(PhoenixEngine PRIVATE $<$<CONFIG:Debug>:-fsanitize=address,undefined>)
-target_link_options(PhoenixEngine PRIVATE $<$<OR:$<CONFIG:Debug>,$<CONFIG:ReleaseAUSan>>:-fsanitize=address,undefined>)
+target_link_options(Phoenix PRIVATE $<$<CONFIG:ReleaseTSan>:-flto -fsanitize=thread>)
+target_link_options(Phoenix PRIVATE $<$<CONFIG:DebugTSan>:-fsanitize=thread>)
+target_link_options(Phoenix PRIVATE $<$<CONFIG:Release>:-flto>)
+target_link_options(Phoenix PRIVATE $<$<CONFIG:Debug>:-fsanitize=address,undefined>)
+target_link_options(Phoenix PRIVATE $<$<OR:$<CONFIG:Debug>,$<CONFIG:ReleaseAUSan>>:-fsanitize=address,undefined>)
 
-target_link_libraries(PhoenixEngine PRIVATE stdc++)
+target_link_libraries(Phoenix PRIVATE stdc++)
 
 add_compile_options($<$<CONFIG:ReleaseTSan>:-O3>)
 add_compile_options($<$<CONFIG:ReleaseAUSan>:-O3>)
@@ -60,9 +60,9 @@ if (NOT CMAKE_OBJCOPY)
     set(CMAKE_OBJCOPY objcopy)
 endif()
 
-set(TARGET_FILE_NAME "$<TARGET_FILE:PhoenixEngine>")
+set(TARGET_FILE_NAME "$<TARGET_FILE:Phoenix>")
 
-add_custom_command(TARGET PhoenixEngine POST_BUILD
+add_custom_command(TARGET Phoenix POST_BUILD
     COMMAND ${CMAKE_OBJCOPY} --only-keep-debug;${TARGET_FILE_NAME} ${TARGET_FILE_NAME}.debug
     COMMAND ${CMAKE_OBJCOPY} --strip-debug ${TARGET_FILE_NAME}
 
