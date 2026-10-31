@@ -30,7 +30,7 @@ return table.freeze({
     EditorBuild = 9,
     StdPath = "@_editres/scripts/std",
     PhoenixPath = "@_editres/scripts/phoenix",
-    GitHubUrl = "https://github.com/PhoenixWhitefire/PhoenixEngine",
+    GitHubUrl = "https://github.com/5-erin/Phoenix",
     GameEditingVMName = "GameEditingVM",
     PlaytestVMName = "Playtest",
     FallbackImage = "@_etextures/editor-icons/fallback.png",

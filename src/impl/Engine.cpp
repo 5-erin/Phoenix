@@ -321,7 +321,7 @@ void Engine::m_InitializeVideo()
 
     Window = glfwCreateWindow(
         WindowSizeX, WindowSizeY,
-        readFromConfiguration<std::string_view>(Config, "GameTitle", "PhoenixEngine").data(),
+        readFromConfiguration<std::string_view>(Config, "GameTitle", "Phoenix").data(),
         nullptr, nullptr
     );
 

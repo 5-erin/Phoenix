@@ -1,5 +1,5 @@
-# CMakeLists.txt for Phoenix Engine
-# https://github.com/PhoenixWhitefire/PhoenixEngine
+# CMakeLists.txt for Phoenix
+# https://github.com/5-erin/Phoenix
 
 cmake_minimum_required(VERSION 3.28)
 
@@ -19,45 +19,45 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 # 19/01/2025
 set(CMAKE_CONFIGURATION_TYPES "Debug;Release;DebugTSan;ReleaseTSan;ReleaseAUSan")
 
-project(PhoenixEngine LANGUAGES C CXX)
+project(Phoenix LANGUAGES C CXX)
 
 file(GLOB_RECURSE PHX_SRCS
 	"src/decl/*.hpp"
 	"src/impl/*.cpp"
 )
 
-add_executable(PhoenixEngine ${PHX_SRCS})
-target_compile_features(PhoenixEngine PUBLIC cxx_std_20)
+add_executable(Phoenix ${PHX_SRCS})
+target_compile_features(Phoenix PUBLIC cxx_std_20)
 
 if (NOT MSVC)
-	target_compile_options(PhoenixEngine PUBLIC -std=gnu++20)
+	target_compile_options(Phoenix PUBLIC -std=gnu++20)
 endif()
 
 source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/src" FILES ${PHX_SRCS})
-target_sources(PhoenixEngine PRIVATE README.md phoenix.conf)
+target_sources(Phoenix PRIVATE README.md phoenix.conf)
 
-set_target_properties(PhoenixEngine PROPERTIES OUTPUT_NAME PhoenixEngine)
+set_target_properties(Phoenix PROPERTIES OUTPUT_NAME Phoenix)
 
-target_compile_definitions(PhoenixEngine PRIVATE $<$<CONFIG:Release>:NDEBUG TRACY_ON_DEMAND>)
+target_compile_definitions(Phoenix PRIVATE $<$<CONFIG:Release>:NDEBUG TRACY_ON_DEMAND>)
 
 set(PHX_BUILD_TYPE $<IF:$<CONFIG:Debug>,Debug,$<IF:$<CONFIG:Release>,Release,$<IF:$<CONFIG:DebugTSan>,DebugTSan,$<IF:$<CONFIG:ReleaseAUSan>,ReleaseAUSan,ReleaseTSan>>>>)
 
 if (MSVC OR NOT (CMAKE_BUILD_TYPE STREQUAL "DebugTSan") OR NOT (CMAKE_BUILD_TYPE STREQUAL "ReleaseTSan"))
-	target_compile_definitions(PhoenixEngine PRIVATE $<IF:$<OR:$<CONFIG:DebugTSan>,$<CONFIG:ReleaseTSan>>,,TRACY_ENABLE>)
-	target_compile_definitions(PhoenixEngine PRIVATE $<IF:$<OR:$<CONFIG:DebugTSan>,$<CONFIG:ReleaseTSan>>,,TRACY_FIBERS>)
+	target_compile_definitions(Phoenix PRIVATE $<IF:$<OR:$<CONFIG:DebugTSan>,$<CONFIG:ReleaseTSan>>,,TRACY_ENABLE>)
+	target_compile_definitions(Phoenix PRIVATE $<IF:$<OR:$<CONFIG:DebugTSan>,$<CONFIG:ReleaseTSan>>,,TRACY_FIBERS>)
 endif()
 
-target_compile_definitions(PhoenixEngine PRIVATE PHX_TARGET_PLATFORM="${CMAKE_SYSTEM_NAME}")
+target_compile_definitions(Phoenix PRIVATE PHX_TARGET_PLATFORM="${CMAKE_SYSTEM_NAME}")
 
 option(PHX_HEADLESS "Build in Headless mode" OFF)
 
 if (PHX_HEADLESS)
-	target_compile_definitions(PhoenixEngine PRIVATE PHX_HEADLESS_BUILD=1)
+	target_compile_definitions(Phoenix PRIVATE PHX_HEADLESS_BUILD=1)
 else()
-	target_compile_definitions(PhoenixEngine PRIVATE PHX_HEADLESS_BUILD=0)
+	target_compile_definitions(Phoenix PRIVATE PHX_HEADLESS_BUILD=0)
 endif()
 
-target_include_directories(PhoenixEngine PUBLIC
+target_include_directories(Phoenix PUBLIC
 	"./"
 	"src/decl"
 	"Vendor"
@@ -75,12 +75,12 @@ target_include_directories(PhoenixEngine PUBLIC
 	"Vendor/glad/include"
 )
 
-target_compile_definitions(PhoenixEngine PRIVATE PHX_BUILD_TYPE="$<CONFIG>" "PHOENIX_$<CONFIG>=1")
+target_compile_definitions(Phoenix PRIVATE PHX_BUILD_TYPE="$<CONFIG>" "PHOENIX_$<CONFIG>=1")
 
 if (MSVC)
 	include(cmake/msvc.txt)
-	target_compile_definitions(PhoenixEngine PRIVATE PHX_TARGET_COMPILER="MSVC")
-	target_compile_options(PhoenixEngine PRIVATE /wd4244 /Zc:preprocessor)
+	target_compile_definitions(Phoenix PRIVATE PHX_TARGET_COMPILER="MSVC")
+	target_compile_options(Phoenix PRIVATE /wd4244 /Zc:preprocessor)
 
 	message(STATUS "Recognized compiler as MSVC")
 
@@ -89,8 +89,8 @@ elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
 	if (CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "19.0.0")
 		if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS "22.0.0")
 			include(cmake/clang.txt)
-			target_compile_definitions(PhoenixEngine PRIVATE PHX_TARGET_COMPILER="Clang++")
-			target_link_libraries(PhoenixEngine PRIVATE X11) # `imgui_impl_glfw.cpp`
+			target_compile_definitions(Phoenix PRIVATE PHX_TARGET_COMPILER="Clang++")
+			target_link_libraries(Phoenix PRIVATE X11) # `imgui_impl_glfw.cpp`
 
 			message(STATUS "Recognized compiler as Clang++ ${CMAKE_CXX_COMPILER_VERSION}")
 		else()
@@ -104,7 +104,7 @@ else()
 	message(FATAL_ERROR "Unsupported compiler - expected either MSVC or Clang, got ${CMAKE_CXX_COMPILER_ID}")
 endif()
 
-target_link_libraries(PhoenixEngine PRIVATE
+target_link_libraries(Phoenix PRIVATE
 	Vendor
 	Glad
 	glm
@@ -121,14 +121,14 @@ target_link_libraries(PhoenixEngine PRIVATE
 )
 
 if (MSVC)
-    target_link_libraries(PhoenixEngine PRIVATE wldap32.lib)
+    target_link_libraries(Phoenix PRIVATE wldap32.lib)
 endif()
 
 # not letting me put multiple definitions in the same expression waaa
 if (MSVC OR NOT (CMAKE_BUILD_TYPE STREQUAL "DebugTSan") OR NOT (CMAKE_BUILD_TYPE STREQUAL "ReleaseTSan"))
 	add_compile_definitions($<IF:$<OR:$<CONFIG:DebugTSan>,$<CONFIG:ReleaseTSan>>,,TRACY_ENABLE>)
 	add_compile_definitions($<IF:$<OR:$<CONFIG:DebugTSan>,$<CONFIG:ReleaseTSan>>,,TRACY_FIBERS>)
-	target_link_libraries(PhoenixEngine PRIVATE $<IF:$<OR:$<CONFIG:DebugTSan>,$<CONFIG:ReleaseTSan>>,,TracyClient>)
+	target_link_libraries(Phoenix PRIVATE $<IF:$<OR:$<CONFIG:DebugTSan>,$<CONFIG:ReleaseTSan>>,,TracyClient>)
 endif()
 add_compile_definitions($<$<CONFIG:Release>:NDEBUG>)
 add_compile_definitions($<$<CONFIG:Release>:TRACY_ON_DEMAND>)
@@ -197,7 +197,7 @@ set_property(TARGET update_mappings PROPERTY FOLDER "Vendor/GLFW3")
 target_compile_definitions(Luau.VM PRIVATE $<IF:$<OR:$<CONFIG:Debug>,$<CONFIG:DebugTSan>>,HARDSTACKTESTS=1 HARDMEMTESTS=1,>)
 
 # build engine after all libs
-add_dependencies(PhoenixEngine
+add_dependencies(Phoenix
 	Vendor
 	Glad
 	TracyClient
@@ -210,12 +210,12 @@ add_dependencies(PhoenixEngine
 )
 
 if (!PHX_HEADLESS)
-	add_dependencies(PhoenixEngine glfw)
+	add_dependencies(Phoenix glfw)
 endif()
 
-set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT PhoenixEngine)
+set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT Phoenix)
 
-set_target_properties(PhoenixEngine
+set_target_properties(Phoenix
     PROPERTIES
     ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/${PHX_BUILD_TYPE}"
     LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/${PHX_BUILD_TYPE}"

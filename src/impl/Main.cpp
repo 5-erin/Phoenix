@@ -1,10 +1,10 @@
 /*
 
-    Phoenix Engine
+    Phoenix
 
     The oldest files I can find show that I started working on this on the 2nd of November, 2021.
 
-    https://github.com/Phoenixwhitefire/PhoenixEngine
+    https://github.com/5-erin/Phoenix
 
 */
 
@@ -791,7 +791,7 @@ int main(int argc, char** argv)
     Logging::Initialize();
     Log.Info(isLauncher ? "Launcher startup" : "Application startup");
 
-    Log.InfoF("Phoenix Engine"
+    Log.InfoF("Phoenix"
         "\n\tVersion: {}"
         "\n\tCommit: {}"
         "\n\tTag: {}"

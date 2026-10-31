@@ -1,4 +1,4 @@
-# PhoenixEngine
+# Phoenix
 
 <img src=".github/assets/pretty1_13-06-2024_bsky.jpg"/>
 
@@ -15,7 +15,7 @@ Personal 3D OpenGL "Game Engine" written in C++, that can:
 Intended to be compatible with both Windows and Linux/Ubuntu.
 
 # Downloading
-You can download binaries from [Actions](https://github.com/PhoenixWhitefire/PhoenixEngine/actions). Pick one at the top with a checkmark, and choose the Release build for your system to [get started](https://github.com/PhoenixWhitefire/PhoenixEngine/wiki/Getting-Started).
+You can download binaries from [Actions](https://github.com/5-erin/Phoenix/actions). Pick one at the top with a checkmark, and choose the Release build for your system to [get started](https://github.com/5-erin/Phoenix/wiki/Getting-Started).
 After downloading from Actions, you can launch the Editor through the main executable.
 
 # Building
@@ -34,7 +34,7 @@ Otherwise, you may follow these instructions.
     - For more information, visit [Dependencies for Wayland and X11](https://www.glfw.org/docs/latest/compile.html#compile_deps_wayland)
 
 
-1. `git clone https://github.com/PhoenixWhitefire/PhoenixEngine --recursive --depth=1`, or just use the `Code <>` button
+1. `git clone https://github.com/5-erin/Phoenix --recursive --depth=1`, or just use the `Code <>` button
     * `--recursive` clones submodules as well (check the `Vendor` directory)
     * `--depth 1` causes only the current commit to be fetched, reducing download times
 2. `cmake -B "build"` in the root directory
@@ -46,7 +46,7 @@ Otherwise, you may follow these instructions.
 	* `Release`: All optimizations, including Link-Time/Whole-Program optimization, no Address Sanitizer, Tracy in `ON_DEMAND` mode
     * `DebugTSan`/`ReleaseTSan`: Debug/Release with Thread sanitizer
     * `ReleaseAUSan`: Release with Address and Undefined-behaviour sanitizer
-5. Run it in the root directory with a command such as `build/Release/PhoenixEngine` (Linux Bash), `. "build/Release/PhoenixEngine"` (Windows Terminal), or `"build/Release/PhoenixEngine"` (Windows Command Prompt)
+5. Run it in the root directory with a command such as `build/Release/Phoenix` (Linux Bash), `. "build/Release/Phoenix"` (Windows Terminal), or `"build/Release/Phoenix"` (Windows Command Prompt)
 
 6. (Optional) I have not configured the Tracy Profiler standalone application to build along with the rest of the Engine, you will need to build it manually. The "Start Profiling" button in the Info widget, as well as the `-tracyim` launch argument, all assume you have built the Profiler yourself and that it is in the expected directory. You can do this with either `shell/profilerbuild.sh`, or with the following equivalent commands:
     * `cd Vendor/tracy/profiler`
@@ -55,9 +55,9 @@ Otherwise, you may follow these instructions.
     
     By the end, you should have a binary at the location `Vendor/tracy/profiler/build/tracy-profiler`.
 
-Remember to check out the [Getting Started](https://github.com/PhoenixWhitefire/PhoenixEngine/wiki/Getting-Started) page on the Wiki.
+Remember to check out the [Getting Started](https://github.com/5-erin/Phoenix/wiki/Getting-Started) page on the Wiki.
 
-Please note that LSP definition files depend on Luau's New Type Solver. Enabling that option in Luau LSP is required for them to work. For more information please read [Integration with Luau LSP](https://github.com/PhoenixWhitefire/PhoenixEngine/wiki/Getting-Started#integration-with-luau-lsp).
+Please note that LSP definition files depend on Luau's New Type Solver. Enabling that option in Luau LSP is required for them to work. For more information please read [Integration with Luau LSP](https://github.com/5-erin/Phoenix/wiki/Getting-Started#integration-with-luau-lsp).
 
 <img src=".github/assets/infooverload.png"/>
 

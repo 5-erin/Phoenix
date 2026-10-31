@@ -3,7 +3,7 @@ local EditorSettings = {}
 
 local Engine = game:GetService("Engine")
 
-local SPYWARE_SETTINGS_URL = "https://github.com/PhoenixWhitefire/PhoenixEngine/issues/30"
+local SPYWARE_SETTINGS_URL = "https://github.com/5-erin/Phoenix/issues/30"
 
 local DefaultThemes = require("@ed/DefaultThemes")
 local ErrorMessage = require("@ed/ErrorMessage")
