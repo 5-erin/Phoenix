@@ -16,6 +16,7 @@
 #include "Memory.hpp"
 
 #define MEMORY_CHECK_MAGIC uint8_t(/* 1 */ 225)
+#define MEMORY_CHECK_FREED uint8_t(/* i can't remember what that '1' is supposed to mean */ 226)
 
 struct alignas(std::max_align_t) AllocHeader
 {
@@ -62,10 +63,10 @@ void* Memory::GetPointerInfo(void* Pointer, uint32_t* Size, uint8_t* Category)
     AllocHeader* header = (AllocHeader*)((uintptr_t)Pointer - sizeof(AllocHeader));
     void* realPointer = (void*)((uintptr_t)header);
 
-    // in case someone passes in a pointer that wasn't alloc'd by `::Alloc` and doesn't immediately segfault,
-    // hold their hand and tell them they're
+    if (header->Check == MEMORY_CHECK_FREED)
+        throw std::runtime_error(std::format("Address '{}' may have already been freed or is unmanaged", Pointer));
     if (header->Check != MEMORY_CHECK_MAGIC)
-        throw std::runtime_error(std::format("Tried `::GetPointerInfo` on unmanaged address '{}'", Pointer));
+        throw std::runtime_error(std::format("Unmanaged address '{}'", Pointer));
 
     if (Size)
         *Size = header->Size;
@@ -140,6 +141,8 @@ void* Memory::ReAlloc(void* Pointer, uint32_t Size, Memory::Category MemCat)
         TracyFree(Pointer);
 #endif
 
+    ((AllocHeader*)Pointer)->Check = MEMORY_CHECK_FREED;
+
     void* ptr = realloc(Pointer, Size);
 
     if (ptr)
@@ -187,6 +190,7 @@ void Memory::Free(void* Pointer)
     Counters[memcat].fetch_sub(size, std::memory_order_relaxed);
     Activity[memcat].fetch_add(size, std::memory_order_relaxed);
 
+    ((AllocHeader*)Pointer)->Check = MEMORY_CHECK_FREED;
     free(Pointer);
 }
 
