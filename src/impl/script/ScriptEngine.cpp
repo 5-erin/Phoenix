@@ -981,7 +981,7 @@ static Reflection::GenericValue toGenericValue(lua_State* L, int StackIndex, int
     case LUA_TUSERDATA:
     {
         if (const Color* col = (Color*)lua_touserdatatagged(L, StackIndex, UserdataTag::Color))
-            return col->ToGenericValue();
+            return *col;
         else if (const glm::mat4* mtx = (glm::mat4*)lua_touserdatatagged(L, StackIndex, UserdataTag::Matrix))
             return *mtx;
         else if (const uint32_t* id = (uint32_t*)lua_touserdatatagged(L, StackIndex, UserdataTag::GameObject))
@@ -1221,7 +1221,7 @@ void ScriptEngine::PushGenericValue(lua_State* L, const Reflection::GenericValue
     }
     case Reflection::ValueType::Color:
     {
-        luhx_pushcolor(L, gv);
+        luhx_pushcolor(L, gv.AsColor());
         break;
     }
     case Reflection::ValueType::Matrix:

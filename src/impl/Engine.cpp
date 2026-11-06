@@ -849,7 +849,7 @@ static void traverseAndRenderUIHierarchy(
 
         if (EcUIFrame* uf = child->FindComponent<EcUIFrame>())
         {
-            shader.SetUniform("Phoenix_BackgroundColor", uf->BackgroundColor.ToGenericValue());
+            shader.SetUniform("Phoenix_BackgroundColor", uf->BackgroundColor);
             shader.SetUniform("Phoenix_BackgroundTransparency", uf->BackgroundTransparency);
             shader.SetUniform("Phoenix_IsImage", false);
             shader.Activate();
@@ -863,7 +863,7 @@ static void traverseAndRenderUIHierarchy(
         {
             TextureManager* TextureManager = TextureManager::Get();
 
-            shader.SetUniform("Phoenix_BackgroundColor", uimg->ImageTint.ToGenericValue());
+            shader.SetUniform("Phoenix_BackgroundColor", uimg->ImageTint);
             shader.SetUniform("Phoenix_BackgroundTransparency", uimg->ImageTransparency);
             shader.SetUniform("Phoenix_IsImage", true);
             shader.SetTextureUniform("Phoenix_Image", TextureManager->LoadFromPath(uimg->Image));
@@ -1761,11 +1761,11 @@ void Engine::Start()
             {
                 ShaderProgram& shader = ShaderManagerInstance.GetShaderResource(shdId);
                 shader.SetUniform("Phoenix_IsShadowMap", false);
-                shader.SetUniform("Phoenix_LightAmbient", env->AmbientLight.ToGenericValue());
+                shader.SetUniform("Phoenix_LightAmbient", env->AmbientLight);
 
                 shader.SetUniform("Phoenix_Fog", env->Fog);
                 if (env->Fog)
-                    shader.SetUniform("Phoenix_FogColor", env->FogColor.ToGenericValue());
+                    shader.SetUniform("Phoenix_FogColor", env->FogColor);
             }
 
             m_Render(deltaTime, particleEmittersRenderList);

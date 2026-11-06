@@ -14,18 +14,16 @@
 #include <tracy/Tracy.hpp>
 
 #include "datatype/EntityComponent.hpp"
+#include "datatype/Color.hpp"
 #include "datatype/Ref.hpp"
 #include "script/InputEvent.hpp"
 
 #define REFLECTION_PROPERTY_GET_SIMPLE(c, n) [](void* p)->Reflection::GenericValue { return static_cast<c*>(p)->n; }
-#define REFLECTION_PROPERTY_GET_SIMPLE_TGN(c, n) [](void* p)->Reflection::GenericValue { return static_cast<c*>(p)->n.ToGenericValue(); }
 #define REFLECTION_PROPERTY_SET_SIMPLE(c, n, t) [](void* p, const Reflection::GenericValue& gv)->void { static_cast<c*>(p)->n = gv.As##t(); }
-#define REFLECTION_PROPERTY_SET_SIMPLE_CTOR(c, n, t) [](void* p, const Reflection::GenericValue& gv)->void { static_cast<c*>(p)->n = t(gv); }
 
 #define REFLECTION_PROPERTY(strn, t, g, s) { strn, { .Name = strn, .Get = (Reflection::PropertyGetter)g, .Set = (Reflection::PropertySetter)s, .Type = Reflection::ValueType::t } }
 
 #define REFLECTION_PROPERTY_SIMPLE(c, n, t) REFLECTION_PROPERTY(#n, t, REFLECTION_PROPERTY_GET_SIMPLE(c, n), REFLECTION_PROPERTY_SET_SIMPLE(c, n, t))
-#define REFLECTION_PROPERTY_SIMPLE_NGV(c, n, t) REFLECTION_PROPERTY(#n, t, REFLECTION_PROPERTY_GET_SIMPLE_TGN(c, n), REFLECTION_PROPERTY_SET_SIMPLE_CTOR(c, n, t))
 
 #define REFLECTION_EVENT(c, n, ...) { \
     #n, \
@@ -167,6 +165,7 @@ namespace Reflection
             double Double;
             char* Str;
             char StrSso[REFLECTION_GV_SSO]; // small string optimization. largest elem is `Mat`
+            Color Col;
             glm::vec2 Vec2;
             glm::vec3 Vec3;
             GenericFunction Func;
@@ -196,6 +195,7 @@ namespace Reflection
         GenericValue(int64_t);
         GenericValue(uint32_t);
         GenericValue(int);
+        GenericValue(const Color&);
         GenericValue(glm::vec2);
         GenericValue(const glm::vec3&);
         GenericValue(const glm::mat4&);
@@ -235,6 +235,7 @@ namespace Reflection
         bool AsBoolean() const;
         double AsDouble() const;
         int64_t AsInteger() const;
+        Color AsColor() const;
         glm::vec2 AsVector2() const;
         glm::vec3 AsVector3() const;
         glm::mat4 AsMatrix() const;

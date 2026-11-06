@@ -9,11 +9,7 @@ MeshComponentRecord::MeshComponentRecord()
 {
     fields = {
         { "asset", Reflection::FieldDescriptor{
-            .Read = [](ComponentRecordBase* cr, uint64_t index) -> Reflection::GenericValue
-            {
-                MeshComponentRecord* mcr = (MeshComponentRecord*)cr;
-                return mcr->data[index].asset;
-            },
+            .Read = ECS_FIELD_READ(MeshComponentRecord, asset),
             .Write = [](ComponentRecordBase* cr, uint64_t index, const Reflection::GenericValue& value)
             {
                 MeshComponentRecord* mcr = (MeshComponentRecord*)cr;
@@ -25,34 +21,8 @@ MeshComponentRecord::MeshComponentRecord()
             },
             .Type = Reflection::ValueType::String,
         } },
-        { "tint", Reflection::FieldDescriptor{
-            .Read = [](ComponentRecordBase* cr, uint64_t index) -> Reflection::GenericValue
-            {
-                MeshComponentRecord* mcr = (MeshComponentRecord*)cr;
-                return mcr->data[index].tint.ToGenericValue();
-            },
-            .Write = [](ComponentRecordBase* cr, uint64_t index, const Reflection::GenericValue& value)
-            {
-                MeshComponentRecord* mcr = (MeshComponentRecord*)cr;
-                mcr->data[index].tint = Color(value);
-            },
-            .Type = Reflection::ValueType::Color,
-            .Serializes = false,
-        } },
-        { "opacity", Reflection::FieldDescriptor{
-            .Read = [](ComponentRecordBase* cr, uint64_t index) -> Reflection::GenericValue
-            {
-                MeshComponentRecord* mcr = (MeshComponentRecord*)cr;
-                return mcr->data[index].opacity;
-            },
-            .Write = [](ComponentRecordBase* cr, uint64_t index, const Reflection::GenericValue& value)
-            {
-                MeshComponentRecord* mcr = (MeshComponentRecord*)cr;
-                mcr->data[index].opacity = value.AsDouble();
-            },
-            .Type = Reflection::ValueType::Double,
-            .Serializes = false,
-        } },
+        { "tint", ECS_FIELD(MeshComponentRecord, tint, Color) },
+        { "opacity", ECS_FIELD(MeshComponentRecord, opacity, Double) },
     };
 }
 
@@ -78,7 +48,7 @@ void MeshComponentRecord::setData(uint64_t index, const Reflection::GenericValue
             data[index].assetId = MeshProvider::Get()->LoadFromPath(asset);
         }
         else if (field == "tint")
-            data[index].tint = Color(v);
+            data[index].tint = v.AsColor();
         else if (field == "opacity")
             data[index].opacity = v.AsDouble();
         else

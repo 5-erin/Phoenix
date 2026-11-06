@@ -11,6 +11,20 @@
 
 #include "Reflection.hpp"
 
+#define ECS_FIELD_READ(CR, field) [](ComponentRecordBase* cr, uint64_t index) -> Reflection::GenericValue \
+{ \
+    CR* record = (CR*)cr; \
+    return record->data[index].field; \
+}
+
+#define ECS_FIELD_WRITE(CR, field, type) [](ComponentRecordBase* cr, uint64_t index, const Reflection::GenericValue& value) \
+{ \
+    CR* record = (CR*)cr; \
+    record->data[index].field = value.As##type(); \
+}
+
+#define ECS_FIELD(CR, field, type) Reflection::FieldDescriptor{ .Read = ECS_FIELD_READ(CR, field), .Write = ECS_FIELD_WRITE(CR, field, type) }
+
 // See JECS.
 
 using Id = uint64_t;

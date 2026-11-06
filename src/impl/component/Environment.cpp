@@ -148,9 +148,9 @@ uint32_t EnvironmentComponentManager::CreateComponent(GameObject* Object)
 const Reflection::StaticPropertyMap& EnvironmentComponentManager::GetProperties()
 {
     static const Reflection::StaticPropertyMap props = {
-        REFLECTION_PROPERTY_SIMPLE_NGV(EcEnvironmentService, AmbientLight, Color),
+        REFLECTION_PROPERTY_SIMPLE(EcEnvironmentService, AmbientLight, Color),
         REFLECTION_PROPERTY_SIMPLE(EcEnvironmentService, Fog, Boolean),
-        REFLECTION_PROPERTY_SIMPLE_NGV(EcEnvironmentService, FogColor, Color),
+        REFLECTION_PROPERTY_SIMPLE(EcEnvironmentService, FogColor, Color),
         REFLECTION_PROPERTY_SIMPLE(EcEnvironmentService, PostProcess, Boolean),
         REFLECTION_PROPERTY_SIMPLE(EcEnvironmentService, BloomEnabled, Boolean),
         REFLECTION_PROPERTY_SIMPLE(EcEnvironmentService, BloomThreshold, Double),

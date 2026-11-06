@@ -229,7 +229,7 @@ void EcParticleEmitter::Render(const glm::mat4& RenderMatrix)
 
         particleShader.SetUniform("Phoenix_Position", glm::vec3(transform[3]));
         particleShader.SetUniform("Phoenix_Size", particle.Size);
-        particleShader.SetUniform("Phoenix_Tint", particle.Tint.ToGenericValue());
+        particleShader.SetUniform("Phoenix_Tint", particle.Tint);
         particleShader.SetUniform("Phoenix_Transparency", particle.Transparency);
         particleShader.SetTextureUniform("Phoenix_Image", Image, Texture::DimensionType::Texture2D, ReservedTextureSlot::ParticleImage);
         particleShader.Activate();

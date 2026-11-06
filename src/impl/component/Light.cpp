@@ -3,7 +3,7 @@
 #include "component/Light.hpp"
 #include "component/Transform.hpp"
 
-#define LIGHT_APIS(t) REFLECTION_PROPERTY_SIMPLE_NGV(t, LightColor, Color), \
+#define LIGHT_APIS(t) REFLECTION_PROPERTY_SIMPLE(t, LightColor, Color), \
 REFLECTION_PROPERTY_SIMPLE(t, Brightness, Double) \
 
 const Reflection::StaticPropertyMap& PointLightComponentManager::GetProperties()

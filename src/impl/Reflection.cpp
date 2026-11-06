@@ -6,7 +6,6 @@
 
 #include "Reflection.hpp"
 #include "datatype/GameObject.hpp"
-#include "datatype/Color.hpp"
 #include "Memory.hpp"
 #include "Utilities.hpp"
 
@@ -89,6 +88,12 @@ Reflection::GenericValue::GenericValue(int i)
     : Type(ValueType::Integer)
 {
     Val.Int = i;
+}
+
+Reflection::GenericValue::GenericValue(const Color& c)
+    : Type(ValueType::Color)
+{
+    Val.Col = c;
 }
 
 Reflection::GenericValue::GenericValue(glm::vec2 v)
@@ -295,10 +300,7 @@ void Reflection::GenericValue::CopyInto(GenericValue& Target, const GenericValue
         break;
     }
     default:
-    {
-        assert(false);
-        Target.Val.Ptr = Source.Val.Ptr;
-    }
+        Target.Val = Source.Val;
     }
 
     assert((Target.Type == Source.Type && Target.Size == Source.Size) || Source.Type == ValueType::Function);
@@ -347,7 +349,7 @@ std::string Reflection::GenericValue::ToString() const
         return AsString();
 
     case ValueType::Color:
-        return Color(*this).ToString();
+        return std::format("{}, {}, {}", Val.Col.R, Val.Col.G, Val.Col.B);
 
     case ValueType::Vector2:
     {
@@ -466,6 +468,13 @@ int64_t Reflection::GenericValue::AsInteger() const
         return (int64_t)Val.Double;
 
     RAISE_RT("GenericValue was not a number ( Integer /Double), but instead a {}", TypeAsString(Type));
+}
+
+Color Reflection::GenericValue::AsColor() const
+{
+    return Type == ValueType::Color
+        ? Val.Col
+        : WRONG_TYPE();
 }
 
 glm::vec2 Reflection::GenericValue::AsVector2() const

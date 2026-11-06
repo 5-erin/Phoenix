@@ -1,8 +1,6 @@
 #pragma once
 
-#include <string>
-
-#include "Reflection.hpp"
+#include <glm/vec3.hpp>
 
 class Color
 {
@@ -22,13 +20,8 @@ public:
 	@return A color made from the specified RGB values
 	*/
 	Color(float R, float G, float B);
-	Color(const Reflection::GenericValue&);
 
-	Reflection::GenericValue ToGenericValue() const;
-	// Returns formatted `R, G, B`
-	std::string ToString();
-
-	float R, G, B;
+	float R = 0.f, G = 0.f, B = 0.f;
 
 	Color operator*(const Color& other) const
 	{

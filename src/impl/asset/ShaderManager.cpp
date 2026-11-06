@@ -93,7 +93,7 @@ void ShaderProgram::Activate()
 			}
 			case Reflection::ValueType::Color:
 			{
-				const Color& vec = Color(value);
+				const Color& vec = value.AsColor();
 				glUniform3f(
 					uniformLoc,
 					vec.R,

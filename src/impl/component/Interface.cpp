@@ -29,7 +29,7 @@ const Reflection::StaticPropertyMap& UITransformComponentManager::GetProperties(
 const Reflection::StaticPropertyMap& UIFrameComponentManager::GetProperties()
 {
     static const Reflection::StaticPropertyMap props = {
-        REFLECTION_PROPERTY_SIMPLE_NGV(EcUIFrame, BackgroundColor, Color),
+        REFLECTION_PROPERTY_SIMPLE(EcUIFrame, BackgroundColor, Color),
         REFLECTION_PROPERTY_SIMPLE(EcUIFrame, BackgroundTransparency, Double),
     };
 
@@ -40,7 +40,7 @@ const Reflection::StaticPropertyMap& UIImageComponentManager::GetProperties()
 {
     static const Reflection::StaticPropertyMap props = {
         REFLECTION_PROPERTY_SIMPLE(EcUIImage, Image, String),
-        REFLECTION_PROPERTY_SIMPLE_NGV(EcUIImage, ImageTint, Color),
+        REFLECTION_PROPERTY_SIMPLE(EcUIImage, ImageTint, Color),
         REFLECTION_PROPERTY_SIMPLE(EcUIImage, ImageTransparency, Double),
     };
 
@@ -69,7 +69,7 @@ const Reflection::StaticPropertyMap& UITextComponentManager::GetProperties()
             }
         ),
 
-        REFLECTION_PROPERTY_SIMPLE_NGV(EcUIText, TextColor, Color),
+        REFLECTION_PROPERTY_SIMPLE(EcUIText, TextColor, Color),
         REFLECTION_PROPERTY_SIMPLE(EcUIText, TextTransparency, Double),
     };
 

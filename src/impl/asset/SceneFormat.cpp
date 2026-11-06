@@ -443,7 +443,7 @@ static Reflection::GenericValue castJsonToGeneric(const std::string_view& propNa
         return (int)memberValue;
 
     case Reflection::ValueType::Color:
-        return getColorFromJson(memberValue).ToGenericValue();
+        return getColorFromJson(memberValue);
 
     case Reflection::ValueType::Vector2:
         return getVector2FromJson(memberValue);
@@ -832,7 +832,7 @@ static nlohmann::json castGenericToJson(const ObjectRef& Object, const std::stri
 
     case Reflection::ValueType::Color:
     {
-        Color col = Color(value);
+        Color col = value.AsColor();
         return { col.R, col.G, col.B };
     }
 

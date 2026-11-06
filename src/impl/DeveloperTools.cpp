@@ -4152,9 +4152,9 @@ static std::optional<Reflection::GenericValue> renderProperty(Reflection::ValueT
     }
     case Reflection::ValueType::Color:
     {
-        Color col = Color(value);
+        Color col = value.AsColor();
         if (ImGui::ColorEdit3("##", &col.R))
-            return col.ToGenericValue();
+            return col;
 
         break;
     }
@@ -4805,7 +4805,7 @@ static void renderProperties()
                 if (doConflict)
                 {
                     if (resetConflictedProperty(propNameCStr))
-                        newVal = Color(0.f, 0.f, 0.f).ToGenericValue();
+                        newVal = Color();
                 }
                 else
                     ImGui::ColorEdit3("##", &newVal.Val.Vec3.x);
