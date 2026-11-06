@@ -16,7 +16,9 @@ struct Ec_
         Exclusive,
         ChildOf,
         Name,
+
         Transform,
+        Mesh,
 
         afterEnd,
         count = afterEnd - 1
@@ -31,6 +33,7 @@ constexpr std::string_view EcNames[] = {
     "ChildOf",
     "Name",
     "Transform",
+    "Mesh",
 };
 
 static_assert(std::size(EcNames) == Ec::count);

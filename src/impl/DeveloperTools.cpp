@@ -4130,6 +4130,52 @@ static bool isInternalTagName(const std::string_view& name)
 
 static bool debugVariable(lua_State* L, bool CanEdit = true);
 
+static std::optional<Reflection::GenericValue> renderProperty(Reflection::ValueType type, const Reflection::GenericValue& value)
+{
+    switch (value.Type)
+    {
+    case Reflection::ValueType::Double:
+    {
+        double num = value.AsDouble();
+        if (ImGui::InputDouble("##", &num))
+            return num;
+
+        break;
+    }
+    case Reflection::ValueType::String:
+    {
+        std::string str = value.AsString();
+        if (ImGui::InputText("##", &str))
+            return str;
+
+        break;
+    }
+    case Reflection::ValueType::Color:
+    {
+        Color col = Color(value);
+        if (ImGui::ColorEdit3("##", &col.R))
+            return col.ToGenericValue();
+
+        break;
+    }
+    case Reflection::ValueType::Matrix:
+    {
+        glm::mat4 mtx = value.AsMatrix();
+        glm::vec3 trans = {};
+        DecomposeTRS(mtx, &trans);
+
+        if (ImGui::InputFloat3("##", glm::value_ptr(trans)))
+            return glm::translate(glm::mat4(1.f), trans);
+
+        break;
+    }
+    default:
+        ImGui::TextUnformatted(value.ToString().c_str());
+    }
+
+    return std::nullopt;
+}
+
 static void renderProperties()
 {
     ZoneScoped;
@@ -4211,28 +4257,7 @@ static void renderProperties()
                     {
                         const Reflection::GenericValue& value = cd->cr->getData(cd->index);
 
-                        switch (value.Type)
-                        {
-                        case Reflection::ValueType::String:
-                        {
-                            std::string str = value.AsString();
-                            if (ImGui::InputText("##", &str))
-                                cd->cr->setData(cd->index, str);
-
-                            break;
-                        }
-                        case Reflection::ValueType::Matrix:
-                        {
-                            glm::mat4 mtx = value.AsMatrix();
-                            glm::vec3 trans = {};
-                            DecomposeTRS(mtx, &trans);
-
-                            if (ImGui::InputFloat3("##", glm::value_ptr(trans)))
-                                cd->cr->setData(cd->index, glm::translate(glm::mat4(1.f), trans));
-
-                            break;
-                        }
-                        case Reflection::ValueType::Component:
+                        if (value.Type == Reflection::ValueType::Component)
                         {
                             ImGui::NewLine();
                             ImGui::Indent();
@@ -4245,31 +4270,22 @@ static void renderProperties()
                                 ImGui::SameLine();
 
                                 const Reflection::GenericValue& inner = descriptor.Read(cd->cr, cd->index);
+                                std::optional<Reflection::GenericValue> newInner = renderProperty(descriptor.Type, inner);
 
-                                switch (inner.Type)
-                                {
-                                case Reflection::ValueType::Matrix:
-                                {
-                                    glm::mat4 mtx = inner.AsMatrix();
-                                    glm::vec3 trans = {};
-                                    DecomposeTRS(mtx, &trans);
-
-                                    if (ImGui::InputFloat3("##", glm::value_ptr(trans)))
-                                        descriptor.Write(cd->cr, cd->index, glm::translate(glm::mat4(1.f), trans));
-                                    break;
-                                }
-                                default:
-                                    ImGui::TextUnformatted(inner.ToString().c_str());
-                                }
+                                if (newInner)
+                                    descriptor.Write(cd->cr, cd->index, newInner.value());
 
                                 ImGui::PopID();
                             }
 
                             ImGui::Unindent();
-                            break;
                         }
-                        default:
-                            ImGui::TextUnformatted(value.ToString().c_str());
+                        else
+                        {
+                            std::optional<Reflection::GenericValue> newValue = renderProperty(value.Type, value);
+
+                            if (newValue)
+                                cd->cr->setData(cd->index, newValue.value());
                         }
                     }
                 }

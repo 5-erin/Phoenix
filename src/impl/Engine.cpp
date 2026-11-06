@@ -41,6 +41,7 @@
 #include "Stl.hpp"
 
 #include "componentsV2/Transform.hpp"
+#include "componentsV2/Mesh.hpp"
 #include "datatype/BuiltinComponents.hpp"
 
 static Engine* EngineInstance = nullptr;
@@ -1595,13 +1596,18 @@ void Engine::Start()
             physWorld.Statics.clear();
             particleEmittersRenderList.clear();
 
-            const Id TransformsQuery[] = { Ec::Transform };
-            world.query(TransformsQuery, [&](Id e, const std::vector<World::ComponentData>& datas)
+            const Id RenderableMeshesQuery[] = { Ec::Mesh, Ec::Transform };
+            world.query(RenderableMeshesQuery, [&](Id e, const std::vector<World::ComponentData>& datas)
             {
+                const TransformComponent& trans = ((TransformComponentRecord*)datas[1].cr)->data[datas[1].index];
+                const MeshComponent& mesh = ((MeshComponentRecord*)datas[0].cr)->data[datas[0].index];
+
                 CurrentScene.RenderList.push_back(RenderItem{
-                    .RenderMeshId = 0,
-                    .Transform = ((TransformComponentRecord*)datas[0].cr)->data[datas[0].index].World,
-                    .MaterialId = MaterialManagerInstance.LoadFromPath("materials/Smooth.mtl"),
+                    .RenderMeshId = mesh.assetId,
+                    .Transform = trans.absolute,
+                    .MaterialId = MaterialManagerInstance.LoadFromPath("materials/Checkered.mtl"),
+                    .TintColor = mesh.tint,
+                    .Transparency = 1.f - mesh.opacity,
                 });
                 return true;
             });

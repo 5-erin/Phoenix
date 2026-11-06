@@ -21,9 +21,11 @@ world:set(childA, ecs.Name, "A")
 world:set(childB, ecs.Name, "B")
 world:set(descendant, ecs.Name, "descendant")
 
+world:set(childA, ecs.Mesh, { asset = "phoenix://meshes/Cube", tint = Color.new(1, 0, 0), opacity = 1 })
+
 world:add(descendant, ecs.pair(ecs.ChildOf, childA))
 
-world:set(childA, ecs.Transform, { World = Matrix.translated(0, 1, 0), Local = Matrix.translated(1, 0, 0) })
+world:set(childA, ecs.Transform, { absolute = Matrix.translated(0, 1, 0), relative = Matrix.translated(1, 0, 0) })
 world:set(childB, Strength, 50)
 world:set(descendant, Health, { Current = 40, Max = 50 })
 
@@ -55,9 +57,6 @@ print("All relationships targeting 'A':")
 for e, _ in world:query(ecs.pair(ecs.Wildcard, childA)) do
     print(`* {nameOf(e)}`)
 end
-
-print("")
-print(`Parent of B: { nameOf(assert(world:parentOf(childB))) }`)
 
 print("")
 print("All things liked by 'A':")
@@ -115,29 +114,29 @@ schedule.frame(function(dt)
             imgui.sameline()
 
             imgui.setnextitemwidth(50)
-            local x, xChanged = imgui.inputnumber("##x", trans.World.Translation.x)
+            local x, xChanged = imgui.inputnumber("##x", trans.absolute.Translation.x)
             imgui.sameline()
             imgui.setnextitemwidth(50)
-            local y, yChanged = imgui.inputnumber("##y", trans.World.Translation.y)
+            local y, yChanged = imgui.inputnumber("##y", trans.absolute.Translation.y)
             imgui.sameline()
             imgui.setnextitemwidth(50)
-            local z, zChanged = imgui.inputnumber("##z", trans.World.Translation.z)
+            local z, zChanged = imgui.inputnumber("##z", trans.absolute.Translation.z)
 
             if xChanged or yChanged or zChanged then
-                trans.World = Matrix.translated(x, y, z)
+                trans.absolute = Matrix.translated(x, y, z)
             end
 
             imgui.setnextitemwidth(50)
-            x, xChanged = imgui.inputnumber("##lx", trans.Local.Translation.x)
+            x, xChanged = imgui.inputnumber("##lx", trans.relative.Translation.x)
             imgui.sameline()
             imgui.setnextitemwidth(50)
-            y, yChanged = imgui.inputnumber("##ly", trans.Local.Translation.y)
+            y, yChanged = imgui.inputnumber("##ly", trans.relative.Translation.y)
             imgui.sameline()
             imgui.setnextitemwidth(50)
-            z, zChanged = imgui.inputnumber("##lz", trans.Local.Translation.z)
+            z, zChanged = imgui.inputnumber("##lz", trans.relative.Translation.z)
 
             if xChanged or yChanged or zChanged then
-                trans.Local = Matrix.translated(x, y, z)
+                trans.relative = Matrix.translated(x, y, z)
             end
         end
 

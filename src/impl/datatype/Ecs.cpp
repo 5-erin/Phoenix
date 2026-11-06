@@ -4,6 +4,7 @@
 #include "datatype/Ecs.hpp"
 #include "datatype/BuiltinComponents.hpp"
 #include "componentsV2/Transform.hpp"
+#include "componentsV2/Mesh.hpp"
 
 Id pair(Id relation, Id target)
 {
@@ -95,6 +96,7 @@ void World::initialize()
     Id childOf = component(new LuauComponentRecord);
     Id name = component(ncr);
     Id transform = component(new TransformComponentRecord);
+    Id mesh = component(new MeshComponentRecord);
 
     add(childOf, exclusive);
 
@@ -109,12 +111,14 @@ void World::initialize()
     assert(childOf == Ec::ChildOf);
     assert(name == Ec::Name);
     assert(transform == Ec::Transform);
+    assert(mesh == Ec::Mesh);
 
     (void)wildcard;
     (void)exclusive;
     (void)childOf;
     (void)name;
     (void)transform;
+    (void)mesh;
 }
 
 void World::shutdown()

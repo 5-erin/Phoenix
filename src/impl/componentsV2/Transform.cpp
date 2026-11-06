@@ -1,32 +1,34 @@
 // Transform.cpp, 24/10/2026
+#include <format>
+
 #include "componentsV2/Transform.hpp"
 
 TransformComponentRecord::TransformComponentRecord()
 {
     fields = {
-        { "Local", Reflection::FieldDescriptor{
+        { "relative", Reflection::FieldDescriptor{
             .Read = [](ComponentRecordBase* cr, uint64_t index) -> Reflection::GenericValue
             {
                 TransformComponentRecord* tcr = (TransformComponentRecord*)cr;
-                return tcr->data[index].Local;
+                return tcr->data[index].relative;
             },
             .Write = [](ComponentRecordBase* cr, uint64_t index, const Reflection::GenericValue& value)
             {
                 TransformComponentRecord* tcr = (TransformComponentRecord*)cr;
-                tcr->data[index].Local = value.AsMatrix();
+                tcr->data[index].relative = value.AsMatrix();
             },
             .Type = Reflection::ValueType::Matrix,
         } },
-        { "World", Reflection::FieldDescriptor{
+        { "absolute", Reflection::FieldDescriptor{
             .Read = [](ComponentRecordBase* cr, uint64_t index) -> Reflection::GenericValue
             {
                 TransformComponentRecord* tcr = (TransformComponentRecord*)cr;
-                return tcr->data[index].World;
+                return tcr->data[index].absolute;
             },
             .Write = [](ComponentRecordBase* cr, uint64_t index, const Reflection::GenericValue& value)
             {
                 TransformComponentRecord* tcr = (TransformComponentRecord*)cr;
-                tcr->data[index].World = value.AsMatrix();
+                tcr->data[index].absolute = value.AsMatrix();
             },
             .Type = Reflection::ValueType::Matrix,
             .Serializes = false,
@@ -49,10 +51,12 @@ void TransformComponentRecord::setData(uint64_t index, const Reflection::Generic
     {
         std::string_view field = k.AsStringView();
 
-        if (field == "Local")
-            data[index].Local = v.AsMatrix();
-        else if (field == "World")
-            data[index].World = v.AsMatrix();
+        if (field == "relative")
+            data[index].relative = v.AsMatrix();
+        else if (field == "absolute")
+            data[index].absolute = v.AsMatrix();
+        else
+            throw std::runtime_error(std::format("Invalid field '{}'", field));
     });
 }
 

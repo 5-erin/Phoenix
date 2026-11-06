@@ -5,8 +5,8 @@
 
 struct TransformComponent
 {
-    glm::mat4 Local = { 1.f };
-    glm::mat4 World = { 1.f };
+    glm::mat4 relative = { 1.f };
+    glm::mat4 absolute = { 1.f };
 };
 
 struct TransformComponentRecord : public ComponentRecord<TransformComponent>

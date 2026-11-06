@@ -5,8 +5,7 @@
 
 #include "datatype/ComponentBase.hpp"
 #include "datatype/Color.hpp"
-
-enum class FaceCullingMode : uint8_t { None, BackFace, FrontFace };
+#include "asset/FaceCullingMode.hpp"
 
 struct EcMesh : public Component<EntityComponent::Mesh>
 {

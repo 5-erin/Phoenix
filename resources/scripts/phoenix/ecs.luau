@@ -111,7 +111,9 @@ type ecs = {
     --- Built-in ChildOf component.
     read ChildOf: Id<Id>,
     --- Built-in Transform component.
-    read Transform: Id<{ Local: Matrix, World: Matrix }>,
+    read Transform: Id<{ relative: Matrix, absolute: Matrix }>,
+    --- Built-in Mesh component.
+    read Mesh: Id<{ asset: string, tint: Color, opacity: number }>,
 }
 
 local function load(): ecs
