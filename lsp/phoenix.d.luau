@@ -192,21 +192,6 @@ declare extern type EventConnection with
 end
 
 
-
-declare GameObject: {
-    --- Clears all previously defined component data
-    read clearAllComponentDefinitions: () -> (),
-    --- Defines a custom component
-    ---
-    --- Throws an error if one with this name was already defined
-    read component: <C>({ read Name: string }) -> ComponentDefinition & C,
-    --- Creates a new Object based on the specified Component, adding additional Components to make it more complete (such as `Mesh` receiving `Mesh`, `RigidBody` and `Transform` to make it fully functional)
-    read fromTemplate: (<T>(MainComponent: T & keyof<Creatables>) -> GameObject & index<Creatables, T>),
-    --- Creates an Object with only the specified Components, or a blank Object if no table is given
-    read new: (<T, C>(Components: { read T | "" }, Custom: { read [C & ComponentDefinition]: C }?) -> GameObject & IntersectComponents<T> & C) & () -> GameObject,
-    --- A list of all valid component names which can be passed into `.new`
-    read validComponents: { string }
-}
 declare extern type InputEvent with
 end
 
@@ -607,7 +592,3 @@ declare Enum: {
 
 
 declare _RUNTIME: _RUNTIME
-    --- The name of the runtime
-    --- URL associated with the runtime
-    --- Version information
-

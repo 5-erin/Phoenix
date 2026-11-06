@@ -1079,15 +1079,6 @@
   "@phoenix/global/_RUNTIME": {
     "documentation": "* Describes the Luau runtime"
   },
-  "@phoenix/global/_RUNTIME.name": {
-    "documentation": "* The name of the runtime"
-  },
-  "@phoenix/global/_RUNTIME.url": {
-    "documentation": "* URL associated with the runtime"
-  },
-  "@phoenix/global/_RUNTIME.version": {
-    "documentation": "* Version information"
-  },
   "@phoenix/globaltype/AtomicInteger": {
     "documentation": "An atomic integer, which can be accessed from multiple threads with an ID through `parallel.atomicinteger`"
   },

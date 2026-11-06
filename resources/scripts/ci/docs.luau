@@ -940,6 +940,10 @@ for _, k in orderedComponents do
 end
 
 local function documentLibrary(name, definitionsFile: string, isPhoenix: boolean): string
+    if name == "GameObject" then
+        return ""
+    end
+
     local isModule = string.find(name, "@phoenix") == 1
 
     local lib = if isPhoenix then docComments.ScriptEnv.Libraries[`@phoenix/{name}`] else docComments.ScriptEnv.Libraries[name]
