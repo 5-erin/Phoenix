@@ -64,9 +64,9 @@ int luhxopen_ecs(lua_State* L)
     return 1;
 }
 
-World* luhx_checkworld(lua_State* L, int idx)
+World& luhx_checkworld(lua_State* L, int idx)
 {
-    return *(World**)luaL_checkudatatagged(L, idx, UserdataTag::World);
+    return **(World**)luaL_checkudatatagged(L, idx, UserdataTag::World);
 }
 
 Id luhx_checkid(lua_State* L, int idx)

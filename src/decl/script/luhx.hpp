@@ -71,7 +71,7 @@ void luhx_pushsignal(lua_State*, const Reflection::EventDescriptor*, const Refle
 void luhx_pushinputevent(lua_State*, const InputEvent&);
 
 struct World;
-World* luhx_checkworld(lua_State* L, int idx);
+World& luhx_checkworld(lua_State* L, int idx);
 
 using Id = uint64_t;
 Id luhx_checkid(lua_State* L, int idx);

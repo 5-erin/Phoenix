@@ -1656,9 +1656,9 @@ static void pushComponentData(lua_State* L, const World::ComponentData& cd)
 }
 
 template <bool AllowNonPresent>
-static int findComponentData(lua_State* L, World* world, Id e, Id c)
+static int findComponentData(lua_State* L, World& world, Id e, Id c)
 {
-    if (std::optional<World::ComponentData> cd = world->find(e, c))
+    if (std::optional<World::ComponentData> cd = world.find(e, c))
     {
         pushComponentData(L, *cd);
     }
@@ -1683,56 +1683,56 @@ struct QueryData
 
 static int world_entity(lua_State* L)
 {
-    World* world = luhx_checkworld(L, 1);
-    luhx_pushid(L, world->entity());
+    World& world = luhx_checkworld(L, 1);
+    luhx_pushid(L, world.entity());
 
     return 1;
 }
 
 static int world_component(lua_State* L)
 {
-    World* world = luhx_checkworld(L, 1);
+    World& world = luhx_checkworld(L, 1);
 
     LuauComponentRecord* lcr = new LuauComponentRecord;
     lcr->owner = lua_mainthread(L);
 
-    luhx_pushid(L, world->component(lcr));
+    luhx_pushid(L, world.component(lcr));
     return 1;
 }
 
 static int world_add(lua_State* L)
 {
-    World* world = luhx_checkworld(L, 1);
+    World& world = luhx_checkworld(L, 1);
     Id e = luhx_checkid(L, 2);
     Id p = luhx_checkid(L, 3);
 
-    world->add(e, p);
+    world.add(e, p);
     return 1;
 }
 
 static int world_remove(lua_State* L)
 {
-    World* world = luhx_checkworld(L, 1);
+    World& world = luhx_checkworld(L, 1);
     Id e = luhx_checkid(L, 2);
     Id p = luhx_checkid(L, 3);
 
-    world->remove(e, p);
+    world.remove(e, p);
     return 1;
 }
 
 static int world_has(lua_State* L)
 {
-    World* world = luhx_checkworld(L, 1);
+    World& world = luhx_checkworld(L, 1);
     Id e = luhx_checkid(L, 2);
     Id c = luhx_checkid(L, 3);
 
-    lua_pushboolean(L, world->find(e, c).has_value());
+    lua_pushboolean(L, world.find(e, c).has_value());
     return 1;
 }
 
 static int world_find(lua_State* L)
 {
-    World* world = luhx_checkworld(L, 1);
+    World& world = luhx_checkworld(L, 1);
     Id e = luhx_checkid(L, 2);
     Id c = luhx_checkid(L, 3);
 
@@ -1741,7 +1741,7 @@ static int world_find(lua_State* L)
 
 static int world_get(lua_State* L)
 {
-    World* world = luhx_checkworld(L, 1);
+    World& world = luhx_checkworld(L, 1);
     Id e = luhx_checkid(L, 2);
     Id c = luhx_checkid(L, 3);
 
@@ -1750,19 +1750,19 @@ static int world_get(lua_State* L)
 
 static int world_set(lua_State* L)
 {
-    World* world = luhx_checkworld(L, 1);
+    World& world = luhx_checkworld(L, 1);
     Id e = luhx_checkid(L, 2);
     Id c = luhx_checkid(L, 3);
     luaL_checkany(L, 4);
 
     World::ComponentData cd = {};
-    if (std::optional<World::ComponentData> cdOpt = world->find(e, c))
+    if (std::optional<World::ComponentData> cdOpt = world.find(e, c))
     {
         cd = cdOpt.value();
     }
     else
     {
-        cd = world->add(e, c);
+        cd = world.add(e, c);
     }
 
     if (cd.cr->isLuau)
@@ -1795,12 +1795,12 @@ static int world_set(lua_State* L)
 
 static int world_targetOf(lua_State* L)
 {
-    World* world = luhx_checkworld(L, 1);
+    World& world = luhx_checkworld(L, 1);
     Id e = luhx_checkid(L, 2);
     Id relation = luhx_checkid(L, 3);
     int index = luaL_optinteger(L, 4, 1) - 1; // 1-based
 
-    if (std::optional<Id> target = world->targetOf(e, relation, index))
+    if (std::optional<Id> target = world.targetOf(e, relation, index))
         luhx_pushid(L, target.value());
     else
         lua_pushnil(L);
@@ -1810,14 +1810,14 @@ static int world_targetOf(lua_State* L)
 
 static int world_targetsOf(lua_State* L)
 {
-    World* world = luhx_checkworld(L, 1);
+    World& world = luhx_checkworld(L, 1);
     Id e = luhx_checkid(L, 2);
     Id relation = luhx_checkid(L, 3);
 
     lua_newtable(L);
 
     std::optional<Id> target;
-    for (int index = 0; (target = world->targetOf(e, relation, index)); index++)
+    for (int index = 0; (target = world.targetOf(e, relation, index)); index++)
     {
         luhx_pushid(L, target.value());
         lua_rawseti(L, -2, index + 1);
@@ -1828,11 +1828,11 @@ static int world_targetsOf(lua_State* L)
 
 static int world_sourceOf(lua_State* L)
 {
-    World* world = luhx_checkworld(L, 1);
+    World& world = luhx_checkworld(L, 1);
     Id relationship = luhx_checkid(L, 2);
     int index = luaL_optinteger(L, 3, 1) - 1; // 1-based
 
-    if (std::optional<Id> source = world->sourceOf(relationship, index))
+    if (std::optional<Id> source = world.sourceOf(relationship, index))
         luhx_pushid(L, source.value());
     else
         lua_pushnil(L);
@@ -1842,13 +1842,13 @@ static int world_sourceOf(lua_State* L)
 
 static int world_sourcesOf(lua_State* L)
 {
-    World* world = luhx_checkworld(L, 1);
+    World& world = luhx_checkworld(L, 1);
     Id relationship = luhx_checkid(L, 2);
 
     lua_newtable(L);
 
     std::optional<Id> target;
-    for (int index = 0; (target = world->sourceOf(relationship, index)); index++)
+    for (int index = 0; (target = world.sourceOf(relationship, index)); index++)
     {
         luhx_pushid(L, target.value());
         lua_rawseti(L, -2, index + 1);
@@ -1859,10 +1859,10 @@ static int world_sourcesOf(lua_State* L)
 
 static int world_parentOf(lua_State* L)
 {
-    World* world = luhx_checkworld(L, 1);
+    World& world = luhx_checkworld(L, 1);
     Id e = luhx_checkid(L, 2);
 
-    if (std::optional<Id> parent = world->parentOf(e))
+    if (std::optional<Id> parent = world.parentOf(e))
         luhx_pushid(L, parent.value());
     else
         lua_pushnil(L);
@@ -1882,7 +1882,7 @@ static int world_childrenOf(lua_State* L)
 static int world_query(lua_State* L)
 {
     QueryData qd = {};
-    qd.world = luhx_checkworld(L, 1);
+    qd.world = &luhx_checkworld(L, 1);
 
     for (int i = 2; i <= lua_gettop(L); i++)
     {

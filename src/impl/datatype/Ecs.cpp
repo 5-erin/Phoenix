@@ -143,9 +143,9 @@ Id World::component(ComponentRecordBase* cr)
     return c;
 }
 
-static void removeTargets(World* world, Id e, Id relation)
+static void removeTargets(World& world, Id e, Id relation)
 {
-    for (const auto& [ id, cr ] : world->predicates)
+    for (const auto& [ id, cr ] : world.predicates)
     {
         if (!isPair(id) || pairFirst(id) != relation)
             continue;
@@ -155,15 +155,15 @@ static void removeTargets(World* world, Id e, Id relation)
             continue;
 
         if (cr->findIndex(e))
-            world->remove(e, id);
+            world.remove(e, id);
     }
 }
 
-static World::ComponentData addPair(World* world, Id e, Id p)
+static World::ComponentData addPair(World& world, Id e, Id p)
 {
     LuauComponentRecord* cr = nullptr;
 
-    if (const auto& old = world->predicates.find(p); old != world->predicates.end())
+    if (const auto& old = world.predicates.find(p); old != world.predicates.end())
     {
         if (!old->second->isLuau)
             throw std::runtime_error("Internal error: Pair was not a Luau record");
@@ -173,7 +173,7 @@ static World::ComponentData addPair(World* world, Id e, Id p)
     else
     {
         cr = new LuauComponentRecord;
-        world->predicates[p] = cr;
+        world.predicates[p] = cr;
     }
 
     return { .cr = cr, .index = cr->insert(e) };
@@ -191,12 +191,12 @@ World::ComponentData World::add(Id e, Id c)
         Id target = pairSecond(c);
 
         if (find(relation, Ec::Exclusive))
-            removeTargets(this, e, relation);
+            removeTargets(*this, e, relation);
 
-        addPair(this, e, pair(relation, Ec::Wildcard));
-        addPair(this, e, pair(Ec::Wildcard, target));
+        addPair(*this, e, pair(relation, Ec::Wildcard));
+        addPair(*this, e, pair(Ec::Wildcard, target));
 
-        return addPair(this, e, c);
+        return addPair(*this, e, c);
     }
     else
     {
@@ -208,20 +208,20 @@ World::ComponentData World::add(Id e, Id c)
     }
 }
 
-static void removeSingle(World* world, Id e, Id c)
+static void removeSingle(World& world, Id e, Id c)
 {
-    if (const auto& it = world->predicates.find(c); it != world->predicates.end())
+    if (const auto& it = world.predicates.find(c); it != world.predicates.end())
         it->second->remove(e);
 }
 
 void World::remove(Id e, Id c)
 {
-    removeSingle(this, e, c);
+    removeSingle(*this, e, c);
 
     if (isPair(c))
     {
-        removeSingle(this, e, pair(pairFirst(c), Ec::Wildcard));
-        removeSingle(this, e, pair(Ec::Wildcard, pairSecond(c)));
+        removeSingle(*this, e, pair(pairFirst(c), Ec::Wildcard));
+        removeSingle(*this, e, pair(Ec::Wildcard, pairSecond(c)));
     }
 }
 
