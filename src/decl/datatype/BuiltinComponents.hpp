@@ -28,12 +28,12 @@ struct Ec_
 using Ec = Ec_::EC;
 
 constexpr std::string_view EcNames[] = {
-    "Wildcard",
-    "Exclusive",
-    "ChildOf",
-    "Name",
-    "Transform",
-    "Mesh",
+    "phoenix.Wildcard",
+    "phoenix.Exclusive",
+    "phoenix.ChildOf",
+    "phoenix.Name",
+    "phoenix.Transform",
+    "phoenix.Mesh",
 };
 
 static_assert(std::size(EcNames) == Ec::count);

@@ -492,15 +492,16 @@
     },
     "Libraries": {
       "@phoenix/ecs": {
-        "ChildOf": "Id",
-        "Exclusive": "Id",
-        "Name": "Id",
-        "Transform": "Id",
-        "Wildcard": "Id",
         "isPair": "function",
         "pair": "function",
         "pairFirst": "function",
-        "pairSecond": "function"
+        "pairSecond": "function",
+        "phoenix.ChildOf": "Id",
+        "phoenix.Exclusive": "Id",
+        "phoenix.Mesh": "Id",
+        "phoenix.Name": "Id",
+        "phoenix.Transform": "Id",
+        "phoenix.Wildcard": "Id"
       },
       "@phoenix/fs": {
         "copy": "function",

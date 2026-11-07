@@ -58,7 +58,7 @@ int luhxopen_ecs(lua_State* L)
     for (Id c = Ec::start; c <= Ec::count; c++)
     {
         luhx_pushid(L, c);
-        lua_setfield(L, -2, EcNames[c - 1].data());
+        lua_setfield(L, -2, EcNames[c - 1].data() + strlen("phoenix."));
     }
 
     return 1;

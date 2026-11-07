@@ -2092,6 +2092,16 @@ void ScriptEngine::s_InitRequireConfig(luarequire_Configuration* config)
     config->is_module_present = [](lua_State*, void* ctx)
         {
             std::filesystem::path* curpath = (std::filesystem::path*)ctx;
+
+            if (size_t bi = curpath->string().find("/phoenix/"); bi != std::string::npos)
+            {
+                std::string path = curpath->string();
+                std::string_view builtin = std::string_view(path.begin() + bi + strlen("/phoenix/"), path.end());
+
+                if (BuiltinLibraries.find(builtin) != BuiltinLibraries.end())
+                    return true;
+            }
+
             if (std::filesystem::is_directory(*curpath))
             {
                 // NOTE: :3
@@ -2107,20 +2117,10 @@ void ScriptEngine::s_InitRequireConfig(luarequire_Configuration* config)
                 }
             }
 
-            if (size_t bi = curpath->string().find("/phoenix/"); bi != std::string::npos)
-            {
-                std::string path = curpath->string();
-                std::string_view builtin = std::string_view(path.begin() + bi, path.end());
-
-                if (BuiltinLibraries.find(builtin) != BuiltinLibraries.end())
-                    return true;
-            }
-
             return std::filesystem::is_regular_file(*curpath)
                     || std::filesystem::is_regular_file(curpath->string() + "c") // `.luauc`
                     || std::filesystem::is_regular_file(*curpath / "init.luau")
-                    || std::filesystem::is_regular_file(*curpath / "init.luauc")
-                    || BuiltinLibraries.find(curpath->string()) != BuiltinLibraries.end();
+                    || std::filesystem::is_regular_file(*curpath / "init.luauc");
         };
     config->get_chunkname = [](lua_State*, void* ctx, char* buffer, size_t bufferSize, size_t* outSize)
         {
