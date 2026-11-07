@@ -772,6 +772,68 @@ static std::vector<ObjectHandle> loadSceneVersion2(const std::string& Contents, 
     return rootObjects;
 }
 
+static std::vector<Id> loadSceneVersion3(const std::string& contents, float version, bool* success)
+{
+    ZoneScoped;
+    nlohmann::json json;
+
+    try
+    {
+        ZoneScopedN("ParseJson");
+        json = nlohmann::json::parse(contents);
+    }
+    catch (const nlohmann::json::parse_error& e)
+    {
+        errorString = std::format(
+            "V3 - JSON parsing error: {}",
+            e.what()
+        );
+
+        *success = false;
+        return {};
+    }
+
+    World& world = Engine::Get()->world;
+    std::unordered_map<uint64_t, Id> sceneToReal;
+
+    const nlohmann::json& entities = json.value("entities", nlohmann::json::array());
+    const nlohmann::json& components = json.value("components", nlohmann::json::array());
+
+    for (uint64_t i = 0; i < entities.size(); i++)
+        sceneToReal[(uint64_t)entities[i]] = world.entity();
+
+    for (uint64_t i = 0; i < components.size(); i++)
+    {
+        const nlohmann::json& component = components[i];
+
+        Id e = sceneToReal.at(component.at("entity"));
+        const std::string name = component.at("name");
+
+        Id c = 0;
+
+        for (Id ci = Ec::start; ci < Ec::count; ci++)
+        {
+            if (EcNames[ci].data() + strlen("phoenix.") == name)
+            {
+                c = ci;
+                break;
+            }
+        }
+
+        if (c != 0)
+        {
+            World::ComponentData cd = world.add(e, c);
+
+            const Reflection::GenericValue value = JsonToGeneric(component.at("value"));
+            cd.cr->setData(cd.index, value);
+        }
+        else
+            SF_WARN("Invalid component '{}'", name);
+    }
+
+    return {};
+}
+
 std::vector<ObjectHandle> SceneFormat::Deserialize(
     const std::string& Contents,
     bool* SuccessPtr
@@ -800,6 +862,8 @@ std::vector<ObjectHandle> SceneFormat::Deserialize(
         objects = loadSceneVersion1(jsonFileContents, SuccessPtr);
     else if (version >= 2.f && version < 3.f)
         objects = loadSceneVersion2(jsonFileContents, version, SuccessPtr);
+    else if (version >= 3.f && version < 4.f)
+        /* entities = */ loadSceneVersion3(jsonFileContents, version, SuccessPtr);
     else
     {
         errorString = std::format(
