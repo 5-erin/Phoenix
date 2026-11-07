@@ -69,6 +69,10 @@ local function renderEnt(e: ecs.Id)
     return imgui.button(nameOf(e))
 end
 
+if true then
+    return
+end
+
 local sel = nil
 
 schedule.frame(function(dt)

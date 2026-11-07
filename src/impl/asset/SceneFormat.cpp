@@ -19,6 +19,11 @@
 #include "FileRW.hpp"
 #include "Log.hpp"
 
+#include "datatype/BuiltinComponents.hpp"
+#include "geometry/DecomposeTRS.hpp"
+#include "componentsV2/Transform.hpp"
+#include "Engine.hpp"
+
 #define SF_WARN(err, ...) Log.WarningF( \
     "Deserialization warning: " err,    \
     __VA_ARGS__                         \
@@ -353,7 +358,7 @@ static void addLegacyComponentDependencies(const ObjectHandle& object)
     }
 }
 
-static ObjectHandle createObjectFromJsonItem(const nlohmann::json& Item, uint32_t ItemIndex, float Version)
+static Id createEntityFromJsonItem(const nlohmann::json& Item, uint32_t ItemIndex, float Version)
 {
     if (Version == 2.f)
     {
@@ -362,8 +367,7 @@ static ObjectHandle createObjectFromJsonItem(const nlohmann::json& Item, uint32_
         if (classNameJson == Item.end())
         {
             SF_WARN("Object #{} was missing its '$_class' key, skipping", ItemIndex);
-
-            return nullptr;
+            return 0;
         }
 
         std::string className = classNameJson.value();
@@ -382,11 +386,11 @@ static ObjectHandle createObjectFromJsonItem(const nlohmann::json& Item, uint32_
         if (components == Item.end())
         {
             SF_WARN("Object #{} was missing its '$_components' key, skipping", ItemIndex);
-
-            return nullptr;
+            return 0;
         }
 
-        ObjectHandle object = GameObjectManager::Get()->Create();
+        World& world = Engine::Get()->world;
+        Id e = world.entity();
 
         for (auto it = components.value().begin(); it != components.value().end(); it++)
         {
@@ -395,34 +399,37 @@ static ObjectHandle createObjectFromJsonItem(const nlohmann::json& Item, uint32_
             if (Version < 2.15f && name == "AnimationAsset")
                 name = "Animation";
 
-            EntityComponent ec = FindComponentTypeByName(name);
+            Id c = 0;
 
-            if (ec == EntityComponent::None)
+            for (Id ci = Ec::start; ci < Ec::count; ci++)
             {
-                SF_WARN("Object #{} with name '{}' had invalid component '{}'", ItemIndex, Item.value("Name", "<UNNAMED>"), name);
-                continue;
+                if (name == EcNames[ci].data() + strlen("phoenix."))
+                {
+                    c = ci;
+                    break;
+                }
             }
 
-            if (!object->FindComponentByType(ec))
-                object->AddComponent(ec);
+            if (c != 0)
+            {
+                world.add(e, c);
+
+                if (name == "Mesh")
+                    world.add(e, Ec::Transform);
+            }
+            else
+                SF_WARN("Invalid component '{}'", name);
         }
 
-        if (Version < 2.11f)
-        {
-            if (object->FindComponent<EcMesh>() && !object->FindComponent<EcRigidBody>())
-                object->AddComponent(EntityComponent::RigidBody);
-        }
-
-        if (Version < 2.12f)
-            addLegacyComponentDependencies(object);
-
+        /*
         if (const auto& tagIt = Item.find("$_tags"); tagIt != Item.end())
         {
             for (size_t i = 0; i < tagIt.value().size(); i++)
                 object->AddTag(tagIt.value()[i]);
         }
+        */
 
-        return object;
+        return e;
     }
 }
 
@@ -528,11 +535,14 @@ static std::vector<ObjectHandle> loadSceneVersion2(const std::string& Contents, 
     objects.reserve(gameObjectsNode.size());
     realIdToSceneId.reserve(gameObjectsNode.size());
 
+    World& world = Engine::Get()->world;
+
     for (uint32_t itemIndex = 0; itemIndex < gameObjectsNode.size(); itemIndex++)
     {
         const nlohmann::json& item = gameObjectsNode[itemIndex];
-        ObjectHandle newObject = createObjectFromJsonItem(item, itemIndex, Version);
+        Id e = createEntityFromJsonItem(item, itemIndex, Version);
 
+        /*
         if (const auto& link = item.find("$_sceneLink"); link != item.end())
         {
             bool subSceneExists = true;
@@ -558,8 +568,9 @@ static std::vector<ObjectHandle> loadSceneVersion2(const std::string& Contents, 
                 SF_WARN("Sub-scene file '{}' not found", (std::string)link.value());
             }
         }
+        */
 
-        std::string name = item.find("Name") != item.end() ? (std::string)item["Name"] : newObject->Name;
+        std::string name = item.find("Name") != item.end() ? (std::string)item["Name"] : "<UNNAMED>";
 
         if (item.find("$_objectId") == item.end())
             SF_WARN("Object #{} was missing its '$_objectId' key", itemIndex);
@@ -576,17 +587,17 @@ static std::vector<ObjectHandle> loadSceneVersion2(const std::string& Contents, 
                 continue;
             }
 
-            objectsMap.insert(std::pair(itemObjectId, newObject));
-            objects.push_back(std::pair(itemObjectId, newObject));
-            realIdToSceneId.insert(std::pair(newObject->ObjectId, itemObjectId));
+            // objectsMap.insert(std::pair(itemObjectId, newObject));
+            // objects.push_back(std::pair(itemObjectId, newObject));
+            // realIdToSceneId.insert(std::pair(newObject->ObjectId, itemObjectId));
         }
 
-        objectProps[newObject->ObjectId] = {};
+        // objectProps[newObject->ObjectId] = {};
 
         // https://json.nlohmann.me/features/iterators/#access-object-key-during-iteration
         for (auto propIt = item.begin(); propIt != item.end(); propIt++)
         {
-            std::string_view propName = propIt.key();
+            std::string propName = propIt.key();
 
             // reserved prefix for data which needs to be saved but isn't a property
             if (propName[0] == '$' && propName[1] == '_')
@@ -601,45 +612,90 @@ static std::vector<ObjectHandle> loadSceneVersion2(const std::string& Contents, 
             if (Version < 2.14f && propName == "LocalSize" && item.find("LocalTransform") != item.end())
                 continue; // handle in `LocalTransform` branch
 
-            if (propName == "LocalSize")
+            if (propName == "localSize")
             {
-                EcTransform* ct = newObject->FindComponent<EcTransform>();
-                assert(ct);
+                std::optional<World::ComponentData> cd = world.find(e, Ec::Transform);
+                assert(cd);
 
-                ct->SetLocalSize(getVector3FromJson(propIt.value()));
+                TransformComponent& tr = ((TransformComponentRecord*)cd->cr)->data[cd->index];
+
+                // TODO SetLocalSize
+                tr.relative = glm::scale(glm::mat4(1.f), getVector3FromJson(propIt.value()));
                 continue;
             }
 
-            const nlohmann::json& memberValue = propIt.value();
-            const Reflection::PropertyDescriptor* prop = newObject->FindProperty(propName);
-            bool isSizeCompat = false;
-
-            if (Version > 2.15f || (propName != "LocalSize" && propName != "Size"))
+            if (propName == "MeshAsset")
             {
-                if (!prop)
-                {
-                    SF_WARN(
-                        "Member '{}' is not defined in the API (Name: '{}')!",
-                        propName,
-                        name
-                    );
-                    continue;
-                }
-                else if (!prop->Set)
-                {
-                    SF_WARN(
-                        "Member '{}' of '{}' is read-only!",
-                        propName,
-                        name
-                    );
-                    continue;
-                }
+                propName = "asset";
+                world.add(e, Ec::Mesh);
+            }
+            else if (propName == "Transparency")
+                propName = "opacity";
+            else if (propName == "Transform")
+            {
+                propName = "absolute";
+                world.add(e, Ec::Transform);
+            }
+
+            propName[0] = tolower(propName[0]);
+
+            const nlohmann::json& memberValue = propIt.value();
+            bool foundField = false;
+
+            if (propName == "name")
+            {
+                std::optional<World::ComponentData> cd = world.find(e, Ec::Name);
+                if (!cd)
+                    cd = world.add(e, Ec::Name);
+
+                cd->cr->setData(cd->index, (std::string)memberValue);
             }
             else
             {
-                isSizeCompat = true;
+                for (const auto& [ c, cr ] : world.predicates)
+                {
+                    if (std::optional<World::ComponentData> target = world.find(e, c); target && !cr->isLuau)
+                    {
+                        const Reflection::FieldMap& fields = cr->getFields();
+                        const auto& fieldIt = fields.find(propName);
+
+                        if (fieldIt != fields.end())
+                        {
+                            foundField = true;
+
+                            if (!fieldIt->second.Read)
+                            {
+                                SF_WARN("'{}' is read-only!", fieldIt->first);
+                                break;
+                            }
+
+                            Reflection::GenericValue assignment = castJsonToGeneric(propName, fieldIt->second.Type, memberValue);
+                            if (propName == "opacity")
+                                assignment = 1.0 - assignment.AsDouble();
+
+                            if (const auto& sizeIt = item.find("Size"); propName == "absolute" && sizeIt != item.end())
+                            {
+                                glm::vec3 size = getVector3FromJson(sizeIt.value());
+                                glm::mat4 trans = assignment.AsMatrix();
+
+                                glm::vec3 pos = {};
+                                glm::quat rot = {};
+                                DecomposeTRS(trans, &pos, &rot);
+
+                                assignment = glm::translate(glm::mat4(1.f), pos) * glm::mat4_cast(rot) * glm::scale(glm::mat4(1.f), size);
+                            }
+
+                            fieldIt->second.Write(cr, target->index, assignment);
+                            break;
+                        }
+                    }
+                }
+
+                if (!foundField)
+                    SF_WARN("Field '{}' not found", propName);
             }
 
+            /*
             Reflection::ValueType propType = prop ? prop->Type : Reflection::ValueType::Vector3; // Size, LocalSize
             propType = Reflection::ValueType(propType & ~Reflection::ValueType::Null);
 
@@ -650,60 +706,19 @@ static std::vector<ObjectHandle> loadSceneVersion2(const std::string& Contents, 
                     memberValue.is_null() ? PHX_GAMEOBJECT_NULL_ID : (uint32_t)memberValue
                 ));
             }
-            else
-            {
-                Reflection::GenericValue assignment = castJsonToGeneric(propName, propType, memberValue);
-
-                if (Version < 2.17f && assignment.Type == Reflection::ValueType::String)
-                {
-                    std::string_view str = assignment.AsStringView();
-                    if (str.starts_with("!"))
-                    {
-                        if (propName == "MeshAsset")
-                            assignment = std::format("phoenix://meshes/{}", str.substr(1));
-                        else if (propName == "Material")
-                            assignment = std::format("phoenix://materials/{}", str.substr(1));
-                    }
-                }
-
-                glm::vec3 size = { 1.f, 1.f, 1.f };
-                // older files might use the world-space ones
-                bool isLocal = propName == "LocalTransform";
-
-                if (Version < 2.14f && (propName == "LocalTransform" || propName == "Transform"))
-                {
-                    const auto& sizeItem = item.find(isLocal ? "LocalSize" : "Size");
-
-                    if (sizeItem != item.end()) // if not found, default size
-                        size = getVector3FromJson(sizeItem.value());
-                }
-
-                try
-                {
-                    if (!isSizeCompat)
-                        newObject->SetPropertyValue(propName, assignment);
-                }
-                catch (const std::runtime_error& err)
-                {
-                    SF_WARN(
-                        "Failed to set {} property '{}' of '{}' to '{}': {}",
-                        Reflection::TypeAsString(propType), propName, name, assignment.ToString(), err.what()
-                    );
-                }
-
-                if (size != glm::vec3(1.f, 1.f, 1.f))
-                {
-                    EcTransform* ct = newObject->FindComponent<EcTransform>();
-                    assert(ct);
-
-                    if (isLocal)
-                        ct->SetLocalSize(size);
-                    else
-                        ct->SetWorldSize(size);
-                }
-            }
+            */
         }
     }
+
+    // TEMP
+    ObjectHandle datamodel = GameObjectManager::s_Create(EntityComponent::DataModel);
+    ObjectHandle workspace = GameObjectManager::s_Create(EntityComponent::Workspace);
+    objects.emplace_back(0, datamodel);
+    objects.emplace_back(1, workspace);
+    objectsMap[0] = datamodel;
+    objectProps[workspace->ObjectId] = { { "Parent", 0 } };
+
+    datamodel->FindComponent<EcDataModel>()->LiveScripts = "scripts/ed/ecstest.luau";
 
     ZoneNamedN(fixupzone, "FixupObjectReferentProperties", true);
 

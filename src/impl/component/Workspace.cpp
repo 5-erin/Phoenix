@@ -17,6 +17,7 @@ static ObjectHandle createCamera()
 {
     ObjectHandle camera = GameObjectManager::s_Create("Camera");
     camera->FindComponent<EcCamera>()->UseSimpleController = true;
+    camera->AddComponent(EntityComponent::Transform);
     camera->Name = "FallbackCamera";
 
     return camera;
@@ -50,7 +51,8 @@ void WorkspaceComponentManager::DeleteComponent(uint32_t Id)
 
 void WorkspaceComponentManager::Shutdown()
 {
-    s_FallbackCamera.Clear();
+    // s_FallbackCamera.Clear();
+    s_FallbackCamera.Reference.TargetId = PHX_GAMEOBJECT_NULL_ID;
     ComponentManager<EcWorkspace>::Shutdown();
 }
 

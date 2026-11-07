@@ -23,7 +23,7 @@
     record->data[index].field = value.As##type(); \
 }
 
-#define ECS_FIELD(CR, field, type) Reflection::FieldDescriptor{ .Read = ECS_FIELD_READ(CR, field), .Write = ECS_FIELD_WRITE(CR, field, type) }
+#define ECS_FIELD(CR, field, type) Reflection::FieldDescriptor{ .Read = ECS_FIELD_READ(CR, field), .Write = ECS_FIELD_WRITE(CR, field, type), .Type = Reflection::ValueType::type }
 
 // See JECS.
 
@@ -53,7 +53,8 @@ struct ComponentRecordBase
 
     virtual const Reflection::FieldMap& getFields()
     {
-        throw std::runtime_error("No reflection data");
+        static const Reflection::FieldMap fields = {};
+        return fields;
     }
 
     std::unordered_map<Id, Id> sparse;
